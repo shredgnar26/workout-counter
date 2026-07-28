@@ -1,0 +1,944 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Daily Weekly Counter</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f7f4;
+        --panel: #ffffff;
+        --ink: #1b1f1a;
+        --muted: #687164;
+        --line: #dfe4dc;
+        --accent: #4f6f52;
+        --accent-dark: #38513b;
+        --warn: #a23d3d;
+        --timer: #20291f;
+        --shadow: 0 16px 40px rgba(31, 40, 28, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      .app {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 28px 0 40px;
+      }
+
+      header {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 22px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 4vw, 4rem);
+        line-height: 0.95;
+        letter-spacing: 0;
+      }
+
+      .sub {
+        max-width: 680px;
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: 1rem;
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .btn {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        color: var(--ink);
+        cursor: pointer;
+        min-height: 40px;
+        padding: 9px 13px;
+      }
+
+      .btn:hover {
+        border-color: #b8c3b4;
+      }
+
+      .btn.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: white;
+      }
+
+      .btn.primary:hover {
+        background: var(--accent-dark);
+      }
+
+      .btn.danger {
+        color: var(--warn);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 14px;
+      }
+
+      .timer-card {
+        display: grid;
+        grid-template-columns: minmax(260px, 0.95fr) minmax(280px, 1.05fr);
+        gap: 16px;
+        align-items: stretch;
+        margin-bottom: 18px;
+      }
+
+      .timer-face {
+        display: grid;
+        align-content: center;
+        gap: 14px;
+        min-height: 320px;
+        border-radius: 8px;
+        background: var(--timer);
+        color: white;
+        padding: 24px;
+      }
+
+      .mode-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .tab {
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        color: white;
+        cursor: pointer;
+        padding: 8px 12px;
+      }
+
+      .tab.active {
+        background: white;
+        color: var(--timer);
+      }
+
+      .timer-time {
+        font-variant-numeric: tabular-nums;
+        font-size: clamp(4.4rem, 12vw, 8.2rem);
+        font-weight: 900;
+        letter-spacing: 0;
+        line-height: 0.88;
+      }
+
+      .timer-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        color: rgba(255, 255, 255, 0.78);
+      }
+
+      .pill {
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 999px;
+        padding: 6px 10px;
+      }
+
+      .timer-controls {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr 1fr;
+        gap: 8px;
+      }
+
+      .timer-controls .btn {
+        min-height: 48px;
+      }
+
+      .timer-settings {
+        display: grid;
+        gap: 12px;
+        align-content: start;
+      }
+
+      .setting-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+
+      .hint {
+        color: var(--muted);
+        font-size: 0.88rem;
+        line-height: 1.4;
+        margin: 0;
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        padding: 16px;
+      }
+
+      .card-top {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .name {
+        width: 100%;
+        border: 0;
+        border-bottom: 1px solid var(--line);
+        padding: 6px 0;
+        color: var(--ink);
+        background: transparent;
+        font-size: 1.05rem;
+        font-weight: 700;
+      }
+
+      .name:focus,
+      input:focus,
+      select:focus {
+        outline: 2px solid rgba(79, 111, 82, 0.25);
+        outline-offset: 2px;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin: 16px 0;
+      }
+
+      .stat {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px;
+        min-width: 0;
+      }
+
+      .label {
+        display: block;
+        color: var(--muted);
+        font-size: 0.75rem;
+        line-height: 1.2;
+      }
+
+      .value {
+        display: block;
+        margin-top: 4px;
+        font-size: 1.8rem;
+        font-weight: 800;
+        line-height: 1;
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+      }
+
+      .settings {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1px solid var(--line);
+      }
+
+      .field {
+        display: grid;
+        gap: 5px;
+      }
+
+      .field.full {
+        grid-column: 1 / -1;
+      }
+
+      .field label {
+        color: var(--muted);
+        font-size: 0.78rem;
+      }
+
+      .field input,
+      .field select {
+        width: 100%;
+        min-height: 38px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+        color: var(--ink);
+        padding: 8px 9px;
+      }
+
+      .empty {
+        border: 1px dashed #b8c3b4;
+        border-radius: 8px;
+        padding: 26px;
+        text-align: center;
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.5);
+      }
+
+      @media (max-width: 720px) {
+        header {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .toolbar {
+          justify-content: stretch;
+        }
+
+        .toolbar .btn {
+          flex: 1;
+        }
+
+        .timer-card {
+          grid-template-columns: 1fr;
+        }
+
+        .timer-face {
+          min-height: 280px;
+        }
+
+        .setting-row,
+        .timer-controls {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header>
+        <div>
+          <h1>Training Counter</h1>
+          <p class="sub">
+            Run EMOMs, HIIT intervals, a simple stopwatch, and up to 10 daily or
+            weekly trackers with persistent browser memory.
+          </p>
+        </div>
+        <div class="toolbar">
+          <button class="btn primary" id="addTracker">Add tracker</button>
+          <button class="btn danger" id="clearAll">Clear all</button>
+        </div>
+      </header>
+
+      <section class="card timer-card" aria-label="Workout timer">
+        <div class="timer-face">
+          <div class="mode-tabs" role="tablist" aria-label="Timer mode">
+            <button class="tab active" type="button" data-mode="stopwatch">
+              Stopwatch
+            </button>
+            <button class="tab" type="button" data-mode="emom">EMOM</button>
+            <button class="tab" type="button" data-mode="hiit">HIIT</button>
+          </div>
+
+          <div class="timer-time" id="timerDisplay">00:00</div>
+          <div class="timer-meta" aria-live="polite">
+            <span class="pill" id="timerPhase">Ready</span>
+            <span class="pill" id="timerRound">Round 0 / 0</span>
+          </div>
+
+          <div class="timer-controls">
+            <button class="btn primary" id="timerStart" type="button">Start</button>
+            <button class="btn" id="timerPause" type="button">Pause</button>
+            <button class="btn danger" id="timerReset" type="button">Reset</button>
+          </div>
+        </div>
+
+        <div class="timer-settings">
+          <div class="setting-row">
+            <div class="field">
+              <label>EMOM rounds</label>
+              <input id="emomRounds" type="number" min="1" max="60" value="10" />
+            </div>
+            <div class="field">
+              <label>EMOM minutes</label>
+              <input id="emomMinutes" type="number" min="1" max="10" value="1" />
+            </div>
+            <div class="field">
+              <label>Countdown</label>
+              <input id="countdownSeconds" type="number" min="0" max="30" value="5" />
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="field">
+              <label>HIIT rounds</label>
+              <input id="hiitRounds" type="number" min="1" max="99" value="8" />
+            </div>
+            <div class="field">
+              <label>Work seconds</label>
+              <input id="workSeconds" type="number" min="5" max="600" value="40" />
+            </div>
+            <div class="field">
+              <label>Rest seconds</label>
+              <input id="restSeconds" type="number" min="0" max="600" value="20" />
+            </div>
+          </div>
+
+          <p class="hint">
+            EMOM uses the minute as the full round. HIIT alternates work and rest.
+            Stopwatch is clean count-up timing for runs, stations, or rest.
+          </p>
+        </div>
+      </section>
+
+      <section class="grid" id="trackerGrid" aria-live="polite"></section>
+    </main>
+
+    <template id="trackerTemplate">
+      <article class="card">
+        <div class="card-top">
+          <input class="name" aria-label="Tracker name" />
+          <button class="btn danger remove" type="button">Remove</button>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <span class="label">Today</span>
+            <span class="value today">0</span>
+          </div>
+          <div class="stat">
+            <span class="label">This Week</span>
+            <span class="value week">0</span>
+          </div>
+          <div class="stat">
+            <span class="label">Lifetime</span>
+            <span class="value lifetime">0</span>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="btn add-one" type="button">+1</button>
+          <button class="btn add-five" type="button">+5</button>
+          <button class="btn minus-one" type="button">-1</button>
+          <button class="btn reset-now" type="button">Reset</button>
+        </div>
+
+        <div class="settings">
+          <div class="field">
+            <label>Daily reset</label>
+            <input class="daily-time" type="time" />
+          </div>
+          <div class="field">
+            <label>Weekly reset</label>
+            <input class="weekly-time" type="time" />
+          </div>
+          <div class="field full">
+            <label>Weekly reset day</label>
+            <select class="weekly-day">
+              <option value="0">Sunday</option>
+              <option value="1">Monday</option>
+              <option value="2">Tuesday</option>
+              <option value="3">Wednesday</option>
+              <option value="4">Thursday</option>
+              <option value="5">Friday</option>
+              <option value="6">Saturday</option>
+            </select>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <script>
+      const STORAGE_KEY = "daily-weekly-counter:v1";
+      const TIMER_STORAGE_KEY = "daily-weekly-counter:timer:v1";
+      const MAX_TRACKERS = 10;
+      const TIMER_DEFAULTS = {
+        mode: "stopwatch",
+        emomRounds: 10,
+        emomMinutes: 1,
+        countdownSeconds: 5,
+        hiitRounds: 8,
+        workSeconds: 40,
+        restSeconds: 20,
+      };
+
+      const timerState = {
+        mode: "stopwatch",
+        running: false,
+        startedAt: 0,
+        elapsedBeforeStart: 0,
+        settings: loadTimerSettings(),
+        intervalId: null,
+      };
+
+      function clampNumber(value, min, max, fallback) {
+        const number = Number(value);
+        if (!Number.isFinite(number)) return fallback;
+        return Math.min(max, Math.max(min, Math.round(number)));
+      }
+
+      function loadTimerSettings() {
+        try {
+          const raw = localStorage.getItem(TIMER_STORAGE_KEY);
+          if (!raw) return { ...TIMER_DEFAULTS };
+          return { ...TIMER_DEFAULTS, ...JSON.parse(raw) };
+        } catch {
+          return { ...TIMER_DEFAULTS };
+        }
+      }
+
+      function saveTimerSettings() {
+        localStorage.setItem(
+          TIMER_STORAGE_KEY,
+          JSON.stringify({ ...timerState.settings, mode: timerState.mode }),
+        );
+      }
+
+      function formatSeconds(totalSeconds) {
+        const safeSeconds = Math.max(0, Math.floor(totalSeconds));
+        const minutes = Math.floor(safeSeconds / 60);
+        const seconds = safeSeconds % 60;
+        return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+      }
+
+      function currentElapsedSeconds() {
+        if (!timerState.running) return timerState.elapsedBeforeStart;
+        return timerState.elapsedBeforeStart + (Date.now() - timerState.startedAt) / 1000;
+      }
+
+      function timerPlan() {
+        const settings = timerState.settings;
+        if (timerState.mode === "emom") {
+          const roundSeconds = settings.emomMinutes * 60;
+          return {
+            rounds: settings.emomRounds,
+            roundSeconds,
+            totalSeconds: settings.emomRounds * roundSeconds,
+          };
+        }
+        if (timerState.mode === "hiit") {
+          const roundSeconds = settings.workSeconds + settings.restSeconds;
+          return {
+            rounds: settings.hiitRounds,
+            roundSeconds,
+            totalSeconds: settings.hiitRounds * roundSeconds,
+          };
+        }
+        return { rounds: 0, roundSeconds: 0, totalSeconds: 0 };
+      }
+
+      function timerSnapshot() {
+        const elapsed = currentElapsedSeconds();
+        const countdown = timerState.settings.countdownSeconds;
+
+        if (timerState.mode === "stopwatch") {
+          return {
+            display: formatSeconds(elapsed),
+            phase: timerState.running ? "Running" : "Ready",
+            round: "Stopwatch",
+            complete: false,
+          };
+        }
+
+        if (elapsed < countdown) {
+          return {
+            display: formatSeconds(countdown - elapsed),
+            phase: "Get ready",
+            round: "Countdown",
+            complete: false,
+          };
+        }
+
+        const activeElapsed = elapsed - countdown;
+        const plan = timerPlan();
+        if (activeElapsed >= plan.totalSeconds) {
+          return {
+            display: "00:00",
+            phase: "Done",
+            round: `Round ${plan.rounds} / ${plan.rounds}`,
+            complete: true,
+          };
+        }
+
+        const roundIndex = Math.floor(activeElapsed / plan.roundSeconds);
+        const roundElapsed = activeElapsed - roundIndex * plan.roundSeconds;
+        const roundNumber = roundIndex + 1;
+
+        if (timerState.mode === "emom") {
+          return {
+            display: formatSeconds(plan.roundSeconds - roundElapsed),
+            phase: "EMOM",
+            round: `Round ${roundNumber} / ${plan.rounds}`,
+            complete: false,
+          };
+        }
+
+        const inWork = roundElapsed < timerState.settings.workSeconds;
+        const phaseSeconds = inWork
+          ? timerState.settings.workSeconds - roundElapsed
+          : plan.roundSeconds - roundElapsed;
+        return {
+          display: formatSeconds(phaseSeconds),
+          phase: inWork ? "Work" : "Rest",
+          round: `Round ${roundNumber} / ${plan.rounds}`,
+          complete: false,
+        };
+      }
+
+      function renderTimer() {
+        const snapshot = timerSnapshot();
+        document.querySelector("#timerDisplay").textContent = snapshot.display;
+        document.querySelector("#timerPhase").textContent = snapshot.phase;
+        document.querySelector("#timerRound").textContent = snapshot.round;
+        document.querySelector("#timerStart").textContent = timerState.running
+          ? "Running"
+          : "Start";
+
+        document.querySelectorAll(".tab").forEach((tab) => {
+          tab.classList.toggle("active", tab.dataset.mode === timerState.mode);
+        });
+
+        if (snapshot.complete && timerState.running) pauseTimer(true);
+      }
+
+      function startTimer() {
+        if (timerState.running) return;
+        timerState.running = true;
+        timerState.startedAt = Date.now();
+        timerState.intervalId = setInterval(renderTimer, 250);
+        renderTimer();
+      }
+
+      function pauseTimer(keepElapsed = false) {
+        if (!timerState.running) return;
+        timerState.elapsedBeforeStart = keepElapsed
+          ? currentElapsedSeconds()
+          : timerState.elapsedBeforeStart + (Date.now() - timerState.startedAt) / 1000;
+        timerState.running = false;
+        clearInterval(timerState.intervalId);
+        timerState.intervalId = null;
+        renderTimer();
+      }
+
+      function resetTimer() {
+        timerState.running = false;
+        timerState.startedAt = 0;
+        timerState.elapsedBeforeStart = 0;
+        clearInterval(timerState.intervalId);
+        timerState.intervalId = null;
+        renderTimer();
+      }
+
+      function setMode(mode) {
+        timerState.mode = mode;
+        resetTimer();
+        saveTimerSettings();
+      }
+
+      function bindTimerSettings() {
+        const fields = [
+          ["emomRounds", 1, 60],
+          ["emomMinutes", 1, 10],
+          ["countdownSeconds", 0, 30],
+          ["hiitRounds", 1, 99],
+          ["workSeconds", 5, 600],
+          ["restSeconds", 0, 600],
+        ];
+
+        timerState.mode = timerState.settings.mode || "stopwatch";
+        fields.forEach(([id, min, max]) => {
+          const input = document.querySelector(`#${id}`);
+          input.value = timerState.settings[id];
+          input.addEventListener("change", () => {
+            timerState.settings[id] = clampNumber(
+              input.value,
+              min,
+              max,
+              TIMER_DEFAULTS[id],
+            );
+            input.value = timerState.settings[id];
+            saveTimerSettings();
+            resetTimer();
+          });
+        });
+
+        document.querySelectorAll(".tab").forEach((tab) => {
+          tab.addEventListener("click", () => setMode(tab.dataset.mode));
+        });
+        document.querySelector("#timerStart").addEventListener("click", startTimer);
+        document.querySelector("#timerPause").addEventListener("click", () => pauseTimer());
+        document.querySelector("#timerReset").addEventListener("click", resetTimer);
+        renderTimer();
+      }
+
+      const defaultTracker = (index) => {
+        const now = Date.now();
+        return {
+          id: crypto.randomUUID(),
+          name: `Tracker ${index}`,
+          today: 0,
+          week: 0,
+          lifetime: 0,
+          dailyResetTime: "00:00",
+          weeklyResetDay: 0,
+          weeklyResetTime: "00:00",
+          lastDailyBoundary: dailyBoundary(new Date(), "00:00"),
+          lastWeeklyBoundary: weeklyBoundary(new Date(), 0, "00:00"),
+          createdAt: now,
+          updatedAt: now,
+        };
+      };
+
+      function parseTime(value) {
+        const [hour = "0", minute = "0"] = String(value || "00:00").split(":");
+        return {
+          hour: Number(hour),
+          minute: Number(minute),
+        };
+      }
+
+      function dailyBoundary(date, time) {
+        const { hour, minute } = parseTime(time);
+        const boundary = new Date(date);
+        boundary.setHours(hour, minute, 0, 0);
+        if (date < boundary) boundary.setDate(boundary.getDate() - 1);
+        return boundary.getTime();
+      }
+
+      function weeklyBoundary(date, day, time) {
+        const { hour, minute } = parseTime(time);
+        const boundary = new Date(date);
+        boundary.setHours(hour, minute, 0, 0);
+        const diff = (boundary.getDay() - Number(day) + 7) % 7;
+        boundary.setDate(boundary.getDate() - diff);
+        if (date < boundary) boundary.setDate(boundary.getDate() - 7);
+        return boundary.getTime();
+      }
+
+      function migrateTracker(tracker) {
+        return {
+          ...tracker,
+          dailyResetTime: tracker.dailyResetTime || "00:00",
+          weeklyResetDay: Number(tracker.weeklyResetDay ?? 0),
+          weeklyResetTime: tracker.weeklyResetTime || "00:00",
+          lastDailyBoundary:
+            tracker.lastDailyBoundary ??
+            dailyBoundary(new Date(), tracker.dailyResetTime || "00:00"),
+          lastWeeklyBoundary:
+            tracker.lastWeeklyBoundary ??
+            weeklyBoundary(
+              new Date(),
+              Number(tracker.weeklyResetDay ?? 0),
+              tracker.weeklyResetTime || "00:00",
+            ),
+        };
+      }
+
+      function applyResets(tracker) {
+        const now = new Date();
+        const currentDaily = dailyBoundary(now, tracker.dailyResetTime);
+        const currentWeekly = weeklyBoundary(
+          now,
+          tracker.weeklyResetDay,
+          tracker.weeklyResetTime,
+        );
+
+        const next = { ...tracker };
+        if (currentDaily > next.lastDailyBoundary) {
+          next.today = 0;
+          next.lastDailyBoundary = currentDaily;
+        }
+        if (currentWeekly > next.lastWeeklyBoundary) {
+          next.week = 0;
+          next.lastWeeklyBoundary = currentWeekly;
+        }
+        return next;
+      }
+
+      function loadTrackers() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return [defaultTracker(1)];
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) return [defaultTracker(1)];
+          return parsed.slice(0, MAX_TRACKERS).map(migrateTracker).map(applyResets);
+        } catch {
+          return [defaultTracker(1)];
+        }
+      }
+
+      let trackers = loadTrackers();
+
+      function save() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(trackers));
+      }
+
+      function updateTracker(id, patch) {
+        trackers = trackers.map((tracker) => {
+          if (tracker.id !== id) return tracker;
+          const next = {
+            ...tracker,
+            ...patch,
+            updatedAt: Date.now(),
+          };
+          return applyResets(next);
+        });
+        save();
+        render();
+      }
+
+      function changeCount(id, delta) {
+        trackers = trackers.map((tracker) => {
+          if (tracker.id !== id) return tracker;
+          const current = applyResets(tracker);
+          const today = Math.max(0, current.today + delta);
+          const week = Math.max(0, current.week + delta);
+          const lifetime = Math.max(0, current.lifetime + delta);
+          return { ...current, today, week, lifetime, updatedAt: Date.now() };
+        });
+        save();
+        render();
+      }
+
+      function resetTracker(id) {
+        updateTracker(id, { today: 0, week: 0 });
+      }
+
+      function removeTracker(id) {
+        trackers = trackers.filter((tracker) => tracker.id !== id);
+        save();
+        render();
+      }
+
+      function render() {
+        trackers = trackers.map(applyResets);
+        save();
+
+        const grid = document.querySelector("#trackerGrid");
+        const template = document.querySelector("#trackerTemplate");
+        grid.replaceChildren();
+
+        if (trackers.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent = "No trackers yet. Add one to start counting.";
+          grid.append(empty);
+          return;
+        }
+
+        trackers.forEach((tracker) => {
+          const node = template.content.cloneNode(true);
+          const card = node.querySelector(".card");
+          const name = node.querySelector(".name");
+          const today = node.querySelector(".today");
+          const week = node.querySelector(".week");
+          const lifetime = node.querySelector(".lifetime");
+          const dailyTime = node.querySelector(".daily-time");
+          const weeklyTime = node.querySelector(".weekly-time");
+          const weeklyDay = node.querySelector(".weekly-day");
+
+          card.dataset.id = tracker.id;
+          name.value = tracker.name;
+          today.textContent = tracker.today;
+          week.textContent = tracker.week;
+          lifetime.textContent = tracker.lifetime;
+          dailyTime.value = tracker.dailyResetTime;
+          weeklyTime.value = tracker.weeklyResetTime;
+          weeklyDay.value = String(tracker.weeklyResetDay);
+
+          name.addEventListener("change", () =>
+            updateTracker(tracker.id, { name: name.value.trim() || "Untitled" }),
+          );
+          dailyTime.addEventListener("change", () =>
+            updateTracker(tracker.id, {
+              dailyResetTime: dailyTime.value || "00:00",
+              lastDailyBoundary: dailyBoundary(new Date(), dailyTime.value || "00:00"),
+            }),
+          );
+          weeklyTime.addEventListener("change", () =>
+            updateTracker(tracker.id, {
+              weeklyResetTime: weeklyTime.value || "00:00",
+              lastWeeklyBoundary: weeklyBoundary(
+                new Date(),
+                Number(weeklyDay.value),
+                weeklyTime.value || "00:00",
+              ),
+            }),
+          );
+          weeklyDay.addEventListener("change", () =>
+            updateTracker(tracker.id, {
+              weeklyResetDay: Number(weeklyDay.value),
+              lastWeeklyBoundary: weeklyBoundary(
+                new Date(),
+                Number(weeklyDay.value),
+                weeklyTime.value || "00:00",
+              ),
+            }),
+          );
+
+          node
+            .querySelector(".add-one")
+            .addEventListener("click", () => changeCount(tracker.id, 1));
+          node
+            .querySelector(".add-five")
+            .addEventListener("click", () => changeCount(tracker.id, 5));
+          node
+            .querySelector(".minus-one")
+            .addEventListener("click", () => changeCount(tracker.id, -1));
+          node
+            .querySelector(".reset-now")
+            .addEventListener("click", () => resetTracker(tracker.id));
+          node
+            .querySelector(".remove")
+            .addEventListener("click", () => removeTracker(tracker.id));
+
+          grid.append(node);
+        });
+      }
+
+      document.querySelector("#addTracker").addEventListener("click", () => {
+        if (trackers.length >= MAX_TRACKERS) {
+          alert("Max 10 trackers.");
+          return;
+        }
+        trackers = [...trackers, defaultTracker(trackers.length + 1)];
+        save();
+        render();
+      });
+
+      document.querySelector("#clearAll").addEventListener("click", () => {
+        if (!confirm("Clear all trackers?")) return;
+        trackers = [];
+        save();
+        render();
+      });
+
+      bindTimerSettings();
+      render();
+      setInterval(render, 60 * 1000);
+    </script>
+  </body>
+</html>
