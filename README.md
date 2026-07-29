@@ -1,8 +1,10 @@
-IttaikaOS Training Counter
+KisekiOS Training Counter
 
 A static HTML training timer and counter app with persistent browser memory. Styled against the Solitude Design Language (SDL) dark/Imperial Violet tokens — Geist type, hairline borders, tabular-numeral mono digits. No build step.
 
-Features
+Three sections: Timer, Track, and Exercises.
+
+Timer
 
 Simple stopwatch
 
@@ -14,13 +16,27 @@ CrossFit-style Web Audio beeps: 3-second countdown beeps, round/phase change ton
 
 Sound on/off toggle persisted in localStorage
 
-Up to 10 concurrent trackers, each with a movement type and quick +5 / +10 / +20 logging
+Exercises
 
-Daily counter with customizable reset time
+An MVP library across two categories: Cardio (Running, Walking, Cycling, RowErg, SkiErg) and Cross-Training (Pull-up, Ring Row, Push-up, Pike Push-up, Air Squat, Burpee Broad Jump, Hollow-body Hold)
 
-Weekly counter with customizable reset day and time
+Each exercise has a measurement type — repetitions, distance, or duration — with distance stored in meters and displayed intelligently (750 m stays meters, 1,000 m+ shows as km)
 
-Lifetime total, plus a quiet "Lifetime Training" figure at the bottom of the page
+Exercises with common variations (Pull-up, Ring Row, Push-up) let you pick a variation instead of creating separate trackers
+
+Add a custom exercise with your own name, category, and measurement type
+
+Apple-style horizontally scrolling category chips with native momentum, snapping, and a persisted last-selected category
+
+Tap an exercise to configure its default quick-add increment, optional daily/weekly goal, and reset schedule, then add it to Track
+
+Track
+
+Shows only exercises explicitly added from the Exercises tab — the full library stays in Exercises
+
+Each card shows today/week/lifetime counts (unit-formatted), an optional goal line, and a single configurable quick-add button
+
+Daily and weekly counters reset automatically at midnight / week start
 
 Browser-local persistence with localStorage for counters, timer settings, and sound preference
 

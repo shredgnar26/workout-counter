@@ -1,13 +1,13 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>IttaikaOS — Training Counter</title>
+    <title>KisekiOS — Training Counter</title>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400..600&family=Geist+Mono:wght@400..600&family=Newsreader:ital,wght@1,400..500&display=swap');
 
-      /* ---- SDL tokens (Solitude Design Language, IttaikaOS/dark) ---- */
+      /* ---- SDL tokens (Solitude Design Language, dark/Imperial Violet — same palette as IttaikaOS) ---- */
       :root {
         --sdl-n-0: #fbfbfc;
         --sdl-n-50: #f6f6f8;
@@ -15,6 +15,7 @@
         --sdl-n-150: #e8e7ed;
         --sdl-n-300: #c6c5cd;
         --sdl-n-600: #64646b;
+        --sdl-n-700: #4a4a52;
         --sdl-n-800: #3a3a41;
         --sdl-n-900: #1d1d23;
         --sdl-n-950: #17171c;
@@ -25,6 +26,9 @@
         --sdl-violet-700: #4b3d77;
         --sdl-violet-800: #3a2f5d;
         --sdl-violet-900: #2a2344;
+
+        --sdl-danger-600: #c4746e;
+        --sdl-danger-700: #d38f8a;
 
         --font-ui: "Geist", -apple-system, "Segoe UI", sans-serif;
         --font-mono: "Geist Mono", ui-monospace, "SF Mono", monospace;
@@ -63,16 +67,18 @@
         --radius-1: 3px;
         --radius-2: 5px;
         --radius-3: 8px;
+        --radius-4: 12px;
         --radius-full: 999px;
 
         --shadow-1: 0 1px 2px rgba(16, 16, 20, 0.05);
+        --shadow-2: 0 1px 2px rgba(16, 16, 20, 0.05), 0 4px 12px rgba(16, 16, 20, 0.06);
 
         --dur-1: 120ms;
         --dur-2: 180ms;
         --ease-out: cubic-bezier(0.25, 0.1, 0, 1);
         --ease-inout: cubic-bezier(0.6, 0, 0.2, 1);
 
-        /* Dark theme semantic tokens */
+        /* Dark theme semantic tokens (same palette as IttaikaOS) */
         --surface-page: var(--sdl-n-1000);
         --surface-card: var(--sdl-n-950);
         --surface-sunken: #0c0c0f;
@@ -95,8 +101,8 @@
         --accent-text: var(--sdl-violet-300);
         --border-accent: var(--sdl-violet-800);
 
-        --danger: #c4746e;
-        --danger-hover: #d38f8a;
+        --danger: var(--sdl-danger-600);
+        --danger-hover: var(--sdl-danger-700);
 
         --focus-ring: var(--sdl-violet-400);
       }
@@ -153,7 +159,7 @@
       .divider {
         border: none;
         border-top: 1px solid var(--border-default);
-        margin: 0 0 var(--space-6);
+        margin: 0 0 var(--space-5);
       }
 
       .kicker {
@@ -284,6 +290,11 @@
         background: var(--accent-hover);
       }
 
+      .btn.primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
       body.stage-bankai .btn {
         transition-duration: 90ms;
       }
@@ -324,6 +335,14 @@
         border-color: var(--danger);
       }
 
+      .btn.block {
+        width: 100%;
+      }
+
+      .btn[hidden] {
+        display: none;
+      }
+
       .grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -338,6 +357,39 @@
         box-shadow: var(--shadow-1);
       }
 
+      /* --- App-level tabs (Timer / Track / Exercises) --- */
+      .app-tabs {
+        display: flex;
+        justify-content: center;
+        gap: var(--space-6);
+        border-bottom: 1px solid var(--border-default);
+        margin-bottom: var(--space-5);
+      }
+
+      .app-tab-panel {
+        display: none;
+      }
+
+      .app-tab-panel.active {
+        display: block;
+        animation: sdl-settle var(--dur-2) var(--ease-out);
+      }
+
+      .panel-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-3);
+        margin-bottom: var(--space-4);
+      }
+
+      .panel-heading h2 {
+        margin: 0;
+        font-size: var(--text-xl);
+        font-weight: var(--weight-semibold);
+        letter-spacing: var(--tracking-heading);
+      }
+
       .timer-card {
         margin-bottom: var(--space-5);
         overflow: hidden;
@@ -349,6 +401,7 @@
         gap: var(--space-4);
         text-align: center;
         padding: var(--space-8) var(--space-6) var(--space-6);
+        background: var(--surface-sunken);
       }
 
       /* Tabs (SDL navigation/Tabs), centered */
@@ -483,6 +536,13 @@
         border-top: 1px solid var(--border-default);
       }
 
+      .field-hint {
+        margin: 6px 0 0;
+        font-size: var(--text-xs);
+        color: var(--text-tertiary);
+        font-feature-settings: var(--numeric);
+      }
+
       /* Collapsible settings groups */
       .settings-group {
         border: 1px solid var(--border-default);
@@ -538,25 +598,21 @@
         padding: var(--space-5) var(--space-5) 0;
       }
 
-      .name {
-        width: 100%;
-        border: 0;
-        border-bottom: 1px solid transparent;
-        padding: 4px 0;
-        color: var(--text-primary);
-        background: transparent;
+      .tracker-name {
+        margin: 0;
         font-size: var(--text-lg);
         font-weight: var(--weight-semibold);
         letter-spacing: var(--tracking-heading);
       }
 
-      .name:hover, .name:focus {
-        border-bottom-color: var(--border-default);
-      }
-
-      .name:focus-visible {
-        outline: none;
-        border-bottom-color: var(--accent);
+      .tracker-category {
+        display: block;
+        margin-top: 2px;
+        font-size: var(--text-2xs);
+        font-weight: var(--weight-medium);
+        letter-spacing: var(--tracking-caps);
+        text-transform: uppercase;
+        color: var(--text-tertiary);
       }
 
       .stats {
@@ -593,10 +649,14 @@
         color: var(--text-primary);
       }
 
+      .goal-line {
+        margin: var(--space-3) var(--space-5) 0;
+        font-size: var(--text-xs);
+        color: var(--text-tertiary);
+        font-feature-settings: var(--numeric);
+      }
+
       .quick-add {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: var(--space-2);
         padding: var(--space-4) var(--space-5) 0;
       }
 
@@ -604,22 +664,13 @@
         display: flex;
         justify-content: flex-end;
         gap: var(--space-1);
-        padding: var(--space-2) var(--space-5) 0;
+        padding: var(--space-2) var(--space-5) var(--space-5);
       }
 
       .secondary-controls .btn {
         height: 28px;
         padding: 0 var(--space-3);
         font-size: var(--text-xs);
-      }
-
-      .settings {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--space-3);
-        margin-top: var(--space-4);
-        padding: var(--space-4) var(--space-5) var(--space-5);
-        border-top: 1px solid var(--border-default);
       }
 
       .field.full {
@@ -634,6 +685,7 @@
       }
 
       input[type="number"],
+      input[type="text"],
       input[type="time"],
       select {
         width: 100%;
@@ -647,6 +699,7 @@
       }
 
       input[type="number"]:focus,
+      input[type="text"]:focus,
       input[type="time"]:focus,
       select:focus {
         outline: none;
@@ -662,6 +715,178 @@
         color: var(--text-tertiary);
         font-size: var(--text-sm);
         background: var(--surface-sunken);
+        display: grid;
+        gap: var(--space-3);
+        justify-items: center;
+      }
+
+      /* --- Exercises tab: category chips --- */
+      .category-scroll {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        display: flex;
+        gap: var(--space-2);
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        background: var(--surface-page);
+        padding: 4px 2px 12px;
+        margin-bottom: var(--space-2);
+      }
+
+      .category-scroll::-webkit-scrollbar {
+        display: none;
+      }
+
+      .category-chip {
+        scroll-snap-align: start;
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        height: 34px;
+        padding: 0 var(--space-4);
+        border-radius: var(--radius-full);
+        border: 1px solid var(--border-default);
+        background: var(--surface-card);
+        color: var(--text-secondary);
+        font-size: var(--text-sm);
+        cursor: pointer;
+        white-space: nowrap;
+        transition: color var(--dur-1) var(--ease-out), border-color var(--dur-1) var(--ease-out);
+      }
+
+      .category-chip:hover {
+        color: var(--text-primary);
+      }
+
+      .category-chip.active {
+        color: var(--text-primary);
+        border-color: var(--border-accent);
+        box-shadow: inset 0 0 0 1px var(--border-accent);
+      }
+
+      .chip-indicator {
+        width: 6px;
+        height: 6px;
+        border-radius: var(--radius-full);
+        background: transparent;
+        margin-right: 7px;
+        transition: background var(--dur-1) var(--ease-out);
+      }
+
+      .category-chip.active .chip-indicator {
+        background: var(--accent);
+      }
+
+      /* --- Exercises tab: exercise list --- */
+      .exercise-list {
+        border-top: 1px solid var(--border-default);
+      }
+
+      .exercise-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-3);
+        width: 100%;
+        padding: 14px var(--space-2);
+        border: none;
+        border-bottom: 1px solid var(--border-default);
+        background: transparent;
+        color: var(--text-primary);
+        font-size: var(--text-md);
+        text-align: left;
+        cursor: pointer;
+        transition: background var(--dur-1) var(--ease-out);
+      }
+
+      .exercise-row:hover {
+        background: var(--surface-sunken);
+      }
+
+      .exercise-row-name {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .exercise-row-unit {
+        flex: none;
+        font-size: var(--text-xs);
+        color: var(--text-tertiary);
+      }
+
+      .tracked-dot {
+        width: 6px;
+        height: 6px;
+        flex: none;
+        border-radius: var(--radius-full);
+        background: var(--accent);
+        opacity: 0;
+        transition: opacity var(--dur-1) var(--ease-out);
+      }
+
+      .exercise-row.tracked .tracked-dot {
+        opacity: 1;
+      }
+
+      .add-custom-row {
+        color: var(--accent-text);
+        font-weight: var(--weight-medium);
+      }
+
+      /* --- Exercise config overlay --- */
+      .config-overlay {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(8, 8, 10, 0.6);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--dur-2) var(--ease-out);
+        z-index: 150;
+        padding: 24px;
+      }
+
+      .config-overlay.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .config-panel {
+        width: min(420px, 100%);
+        max-height: 88vh;
+        overflow-y: auto;
+        padding: var(--space-6);
+        border-radius: var(--radius-4);
+        box-shadow: var(--shadow-2);
+      }
+
+      .config-panel h3 {
+        margin: 0 0 var(--space-5);
+        font-size: var(--text-xl);
+        font-weight: var(--weight-semibold);
+        letter-spacing: var(--tracking-heading);
+      }
+
+      .config-field {
+        margin-bottom: var(--space-4);
+      }
+
+      .config-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--space-2);
+        margin-top: var(--space-5);
+      }
+
+      .config-footer .btn.danger {
+        margin-right: auto;
       }
 
       /* Lifetime Training / hidden XP total */
@@ -745,8 +970,7 @@
         }
 
         .setting-row,
-        .timer-controls,
-        .quick-add {
+        .timer-controls {
           grid-template-columns: 1fr;
         }
       }
@@ -756,7 +980,7 @@
     <main class="app">
       <header class="page-header">
         <div>
-          <p class="kicker"><span class="logo-mark" id="logoMark">ITTAIKAOS</span></p>
+          <p class="kicker"><span class="logo-mark" id="logoMark">KISEKIOS</span></p>
           <h1>Training Counter</h1>
           <p class="sub">
             Run EMOMs, HIIT intervals, a stopwatch, and lightweight training
@@ -772,85 +996,111 @@
             </span>
             Sound
           </label>
-          <button class="btn" id="addTracker">Add tracker</button>
-          <button class="btn danger" id="clearAll">Clear all</button>
         </div>
       </header>
       <hr class="divider" />
 
-      <section class="card timer-card" aria-label="Workout timer">
-        <div class="timer-face">
-          <div class="mode-tabs" role="tablist" aria-label="Timer mode">
-            <button class="tab active" type="button" data-mode="stopwatch">
-              <span class="tab-indicator"></span>Stopwatch
-            </button>
-            <button class="tab" type="button" data-mode="emom">
-              <span class="tab-indicator"></span>EMOM
-            </button>
-            <button class="tab" type="button" data-mode="hiit">
-              <span class="tab-indicator"></span>HIIT
-            </button>
-          </div>
+      <div class="app-tabs" role="tablist" aria-label="Sections">
+        <button class="tab active app-tab" type="button" data-tab="timer">
+          <span class="tab-indicator"></span>Timer
+        </button>
+        <button class="tab app-tab" type="button" data-tab="track">
+          <span class="tab-indicator"></span>Track
+        </button>
+        <button class="tab app-tab" type="button" data-tab="exercises">
+          <span class="tab-indicator"></span>Exercises
+        </button>
+      </div>
 
-          <div class="timer-time" id="timerDisplay">00:00</div>
-          <div class="timer-meta" aria-live="polite">
-            <span class="pill" id="timerPhase">Ready</span>
-            <span class="pill" id="timerRound">Round 0 / 0</span>
-          </div>
-
-          <div class="timer-controls">
-            <button class="btn primary" id="timerStart" type="button">Start</button>
-            <button class="btn" id="timerPause" type="button">Pause</button>
-            <button class="btn ghost" id="timerReset" type="button">Reset</button>
-          </div>
-        </div>
-
-        <div class="timer-settings">
-          <div>
-            <label class="field-label" for="countdownSeconds">Countdown (EMOM &amp; HIIT)</label>
-            <input id="countdownSeconds" type="number" min="0" max="30" value="5" />
-          </div>
-
-          <details class="settings-group" id="emomSettings">
-            <summary>EMOM settings</summary>
-            <div class="setting-row">
-              <div>
-                <label class="field-label" for="emomRounds">Rounds</label>
-                <input id="emomRounds" type="number" min="1" max="60" value="10" />
-              </div>
-              <div>
-                <label class="field-label" for="emomMinutes">Minutes / round</label>
-                <input id="emomMinutes" type="number" min="1" max="10" value="1" />
-              </div>
+      <section class="app-tab-panel active" id="panel-timer" data-tab="timer">
+        <section class="card timer-card" aria-label="Workout timer">
+          <div class="timer-face">
+            <div class="mode-tabs" role="tablist" aria-label="Timer mode">
+              <button class="tab active" type="button" data-mode="stopwatch">
+                <span class="tab-indicator"></span>Stopwatch
+              </button>
+              <button class="tab" type="button" data-mode="emom">
+                <span class="tab-indicator"></span>EMOM
+              </button>
+              <button class="tab" type="button" data-mode="hiit">
+                <span class="tab-indicator"></span>HIIT
+              </button>
             </div>
-          </details>
 
-          <details class="settings-group" id="hiitSettings">
-            <summary>HIIT settings</summary>
-            <div class="setting-row">
-              <div>
-                <label class="field-label" for="hiitRounds">Rounds</label>
-                <input id="hiitRounds" type="number" min="1" max="99" value="8" />
-              </div>
-              <div>
-                <label class="field-label" for="workSeconds">Work seconds</label>
-                <input id="workSeconds" type="number" min="5" max="600" value="40" />
-              </div>
-              <div>
-                <label class="field-label" for="restSeconds">Rest seconds</label>
-                <input id="restSeconds" type="number" min="0" max="600" value="20" />
-              </div>
+            <div class="timer-time" id="timerDisplay">00:00</div>
+            <div class="timer-meta" aria-live="polite">
+              <span class="pill" id="timerPhase">Ready</span>
+              <span class="pill" id="timerRound">Round 0 / 0</span>
             </div>
-          </details>
 
-          <p class="hint">
-            The last 3 seconds of every phase beep, each new round or phase
-            change plays a tone, and finishing plays a rising three-tone chime.
-          </p>
-        </div>
+            <div class="timer-controls">
+              <button class="btn primary" id="timerStart" type="button">Start</button>
+              <button class="btn" id="timerPause" type="button">Pause</button>
+              <button class="btn ghost" id="timerReset" type="button">Reset</button>
+            </div>
+          </div>
+
+          <div class="timer-settings">
+            <div>
+              <label class="field-label" for="countdownSeconds">Countdown (EMOM &amp; HIIT)</label>
+              <input id="countdownSeconds" type="number" min="0" max="30" value="5" />
+            </div>
+
+            <details class="settings-group" id="emomSettings">
+              <summary>EMOM settings</summary>
+              <div class="setting-row">
+                <div>
+                  <label class="field-label" for="emomRounds">Rounds</label>
+                  <input id="emomRounds" type="number" min="1" max="60" value="10" />
+                </div>
+                <div>
+                  <label class="field-label" for="emomMinutes">Minutes / round</label>
+                  <input id="emomMinutes" type="number" min="1" max="10" value="1" />
+                </div>
+              </div>
+            </details>
+
+            <details class="settings-group" id="hiitSettings">
+              <summary>HIIT settings</summary>
+              <div class="setting-row">
+                <div>
+                  <label class="field-label" for="hiitRounds">Rounds</label>
+                  <input id="hiitRounds" type="number" min="1" max="99" value="8" />
+                </div>
+                <div>
+                  <label class="field-label" for="workSeconds">Work seconds</label>
+                  <input id="workSeconds" type="number" min="5" max="600" value="40" />
+                </div>
+                <div>
+                  <label class="field-label" for="restSeconds">Rest seconds</label>
+                  <input id="restSeconds" type="number" min="0" max="600" value="20" />
+                </div>
+              </div>
+            </details>
+
+            <p class="hint">
+              The last 3 seconds of every phase beep, each new round or phase
+              change plays a tone, and finishing plays a rising three-tone chime.
+            </p>
+          </div>
+        </section>
       </section>
 
-      <section class="grid" id="trackerGrid" aria-live="polite"></section>
+      <section class="app-tab-panel" id="panel-track" data-tab="track">
+        <div class="panel-heading">
+          <h2>Track</h2>
+          <button class="btn ghost danger" id="clearAll" type="button">Clear all</button>
+        </div>
+        <section class="grid" id="trackerGrid" aria-live="polite"></section>
+      </section>
+
+      <section class="app-tab-panel" id="panel-exercises" data-tab="exercises">
+        <div class="category-scroll" id="categoryScroll" role="tablist" aria-label="Exercise category">
+          <button class="category-chip" type="button" data-category="cardio"><span class="chip-indicator"></span>Cardio</button>
+          <button class="category-chip" type="button" data-category="crosstraining"><span class="chip-indicator"></span>Cross-Training</button>
+        </div>
+        <div class="exercise-list" id="exerciseList"></div>
+      </section>
 
       <section class="xp-section">
         <p class="xp-label">Lifetime Training</p>
@@ -861,7 +1111,10 @@
     <template id="trackerTemplate">
       <article class="card">
         <div class="card-top">
-          <input class="name" aria-label="Tracker name" />
+          <div>
+            <p class="tracker-name"></p>
+            <span class="tracker-category"></span>
+          </div>
           <button class="btn danger remove" type="button">Remove</button>
         </div>
 
@@ -880,53 +1133,70 @@
           </div>
         </div>
 
+        <p class="goal-line" hidden></p>
+
         <div class="quick-add">
-          <button class="btn accent-outline add-five" type="button">+5</button>
-          <button class="btn accent-outline add-ten" type="button">+10</button>
-          <button class="btn accent-outline add-twenty" type="button">+20</button>
+          <button class="btn accent-outline block add-increment" type="button">+5</button>
         </div>
 
         <div class="secondary-controls">
           <button class="btn ghost minus-one" type="button">-1</button>
           <button class="btn ghost reset-now" type="button">Reset</button>
         </div>
-
-        <div class="settings">
-          <div class="field full">
-            <label>Movement type</label>
-            <select class="movement-type">
-              <option value="pullup">Pull-up</option>
-              <option value="ringpushup">Ring push-up</option>
-              <option value="pikepushup">Pike push-up</option>
-              <option value="aussierow">Australian row</option>
-              <option value="squat">Squat</option>
-              <option value="hollowhold">Hollow hold (seconds)</option>
-              <option value="other" selected>Other</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Daily reset</label>
-            <input class="daily-time" type="time" />
-          </div>
-          <div class="field">
-            <label>Weekly reset</label>
-            <input class="weekly-time" type="time" />
-          </div>
-          <div class="field full">
-            <label>Weekly reset day</label>
-            <select class="weekly-day">
-              <option value="0">Sunday</option>
-              <option value="1">Monday</option>
-              <option value="2">Tuesday</option>
-              <option value="3">Wednesday</option>
-              <option value="4">Thursday</option>
-              <option value="5">Friday</option>
-              <option value="6">Saturday</option>
-            </select>
-          </div>
-        </div>
       </article>
     </template>
+
+    <div class="config-overlay" id="configOverlay" aria-hidden="true">
+      <div class="card config-panel" id="configPanel">
+        <h3 id="configExerciseName">Exercise</h3>
+
+        <div class="config-field" id="configCustomNameField" hidden>
+          <label class="field-label" for="configCustomName">Exercise name</label>
+          <input id="configCustomName" type="text" maxlength="40" placeholder="e.g. Sled Push" />
+        </div>
+
+        <div class="config-field" id="configMeasurementField" hidden>
+          <label class="field-label" for="configMeasurement">Measurement</label>
+          <select id="configMeasurement">
+            <option value="reps">Repetitions</option>
+            <option value="distance">Distance</option>
+            <option value="duration">Duration</option>
+          </select>
+        </div>
+
+        <div class="config-field" id="configVariationField" hidden>
+          <label class="field-label" for="configVariation">Variation</label>
+          <select id="configVariation"></select>
+        </div>
+
+        <div class="config-field">
+          <label class="field-label" id="configIncrementLabel" for="configIncrement">Default increment</label>
+          <input id="configIncrement" type="number" min="1" max="200000" value="5" />
+          <p class="field-hint" id="configIncrementHint"></p>
+        </div>
+
+        <div class="config-field">
+          <label class="field-label" for="configCadence">Reset schedule</label>
+          <select id="configCadence">
+            <option value="none">No goal</option>
+            <option value="daily">Daily</option>
+            <option value="weekly" selected>Weekly</option>
+          </select>
+        </div>
+
+        <div class="config-field" id="configGoalField">
+          <label class="field-label" id="configGoalLabel" for="configGoal">Weekly goal</label>
+          <input id="configGoal" type="number" min="0" max="1000000" placeholder="Optional" />
+          <p class="field-hint" id="configGoalHint"></p>
+        </div>
+
+        <div class="config-footer">
+          <button class="btn danger" id="configRemove" type="button" hidden>Remove from Track</button>
+          <button class="btn ghost" id="configCancel" type="button">Cancel</button>
+          <button class="btn primary" id="configSave" type="button">Add to Track</button>
+        </div>
+      </div>
+    </div>
 
     <div class="chair-overlay" id="chairOverlay" aria-hidden="true">
       <div class="chair-overlay-content">
@@ -936,11 +1206,16 @@
     </div>
 
     <script>
-      const STORAGE_KEY = "daily-weekly-counter:v1";
+      const STORAGE_KEY = "daily-weekly-counter:v3";
+      const LEGACY_STORAGE_KEY_V1 = "daily-weekly-counter:v1";
+      const LEGACY_STORAGE_KEY_V2 = "daily-weekly-counter:v2";
+      const CUSTOM_EXERCISES_KEY = "daily-weekly-counter:custom-exercises:v1";
       const TIMER_STORAGE_KEY = "daily-weekly-counter:timer:v1";
       const SOUND_STORAGE_KEY = "daily-weekly-counter:sound:v1";
       const XP_STORAGE_KEY = "daily-weekly-counter:xp:v1";
-      const MAX_TRACKERS = 10;
+      const APP_TAB_STORAGE_KEY = "daily-weekly-counter:app-tab:v1";
+      const CATEGORY_STORAGE_KEY = "daily-weekly-counter:category:v2";
+      const MAX_TRACKERS = 60;
       const TIMER_DEFAULTS = {
         mode: "stopwatch",
         emomRounds: 10,
@@ -951,16 +1226,105 @@
         restSeconds: 20,
       };
 
-      // --- Hidden progression system. Never rendered, never explained. ---
-      const XP_WEIGHTS = {
-        pullup: 3,
-        ringpushup: 2,
-        pikepushup: 2,
-        aussierow: 2,
-        squat: 1,
-        hollowhold: 0.4,
-        other: 1.5,
+      // --- Exercise library: MVP-12, KisekiOS ---
+      const CATEGORY_ORDER = ["cardio", "crosstraining"];
+      const CATEGORY_LABELS = { cardio: "Cardio", crosstraining: "Cross-Training" };
+      const UNIT_LABELS = { reps: "reps", distance: "meters", duration: "seconds" };
+
+      const EXERCISE_LIBRARY = {
+        cardio: [
+          { id: "running", name: "Running", measurement: "distance", defaultIncrement: 1000 },
+          { id: "walking", name: "Walking", measurement: "distance", defaultIncrement: 500 },
+          { id: "cycling", name: "Cycling", measurement: "distance", defaultIncrement: 2000 },
+          { id: "rowerg", name: "RowErg", measurement: "distance", defaultIncrement: 250 },
+          { id: "skierg", name: "SkiErg", measurement: "distance", defaultIncrement: 250 },
+        ],
+        crosstraining: [
+          { id: "pull-up", name: "Pull-up", measurement: "reps", defaultIncrement: 5, variations: ["Bar", "Rings", "Chin-up", "Neutral grip"] },
+          { id: "ring-row", name: "Ring Row", measurement: "reps", defaultIncrement: 5, variations: ["Ring Row", "Australian Row"] },
+          { id: "push-up", name: "Push-up", measurement: "reps", defaultIncrement: 10, variations: ["Floor", "Rings", "Incline", "Decline"] },
+          { id: "pike-push-up", name: "Pike Push-up", measurement: "reps", defaultIncrement: 5 },
+          { id: "air-squat", name: "Air Squat", measurement: "reps", defaultIncrement: 10 },
+          { id: "burpee-broad-jump", name: "Burpee Broad Jump", measurement: "distance", defaultIncrement: 25 },
+          { id: "hollow-body-hold", name: "Hollow-body Hold", measurement: "duration", defaultIncrement: 20 },
+        ],
       };
+
+      let customExercises = loadCustomExercises();
+
+      function loadCustomExercises() {
+        try {
+          const raw = localStorage.getItem(CUSTOM_EXERCISES_KEY);
+          const parsed = raw ? JSON.parse(raw) : [];
+          return Array.isArray(parsed) ? parsed : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function saveCustomExercises() {
+        localStorage.setItem(CUSTOM_EXERCISES_KEY, JSON.stringify(customExercises));
+      }
+
+      function exercisesForCategory(category) {
+        const custom = customExercises.filter((e) => e.category === category);
+        return [...(EXERCISE_LIBRARY[category] || []), ...custom];
+      }
+
+      function findExercise(exerciseId) {
+        for (const category of CATEGORY_ORDER) {
+          const found = exercisesForCategory(category).find((e) => e.id === exerciseId);
+          if (found) return { ...found, category };
+        }
+        return null;
+      }
+
+      function slugify(text) {
+        return (
+          text
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "") || "exercise"
+        );
+      }
+
+      // --- Unit formatting: everything is stored in the exercise's base unit
+      // (reps, meters, seconds); distance/duration render intelligently. ---
+      function formatDistance(meters) {
+        const m = Number(meters) || 0;
+        if (m < 1000) return `${Math.round(m)} m`;
+        return `${(m / 1000).toFixed(2)} km`;
+      }
+
+      function formatDuration(seconds) {
+        const s = Math.max(0, Math.round(Number(seconds) || 0));
+        if (s < 60) return `${s}s`;
+        return formatSeconds(s);
+      }
+
+      function formatQuantity(measurement, value) {
+        if (measurement === "distance") return formatDistance(value);
+        if (measurement === "duration") return formatDuration(value);
+        return String(Math.round(Number(value) || 0));
+      }
+
+      // --- Hidden progression system. Never rendered, never explained. ---
+      const EXERCISE_XP_RATE = {
+        running: 0.01,
+        walking: 0.004,
+        cycling: 0.003,
+        rowerg: 0.02,
+        skierg: 0.02,
+        "pull-up": 3,
+        "ring-row": 2,
+        "push-up": 1.5,
+        "pike-push-up": 2,
+        "air-squat": 1,
+        "burpee-broad-jump": 0.06,
+        "hollow-body-hold": 0.4,
+      };
+      const CUSTOM_XP_RATE_DEFAULT = { reps: 1.5, distance: 0.01, duration: 0.3 };
       const XP_BONUS_EMOM = 30;
       const XP_BONUS_HIIT = 30;
       const XP_BONUS_WEEKLY = 60;
@@ -988,8 +1352,12 @@
         localStorage.setItem(XP_STORAGE_KEY, JSON.stringify(xpState));
       }
 
-      function xpWeightFor(movementType) {
-        return XP_WEIGHTS[movementType] ?? XP_WEIGHTS.other;
+      function xpWeightFor(tracker) {
+        return (
+          EXERCISE_XP_RATE[tracker.exerciseId] ??
+          CUSTOM_XP_RATE_DEFAULT[tracker.measurement] ??
+          1
+        );
       }
 
       function addXp(amount) {
@@ -1260,7 +1628,7 @@
           ? "Running"
           : "Start";
 
-        document.querySelectorAll(".tab").forEach((tab) => {
+        document.querySelectorAll("#panel-timer .tab").forEach((tab) => {
           tab.classList.toggle("active", tab.dataset.mode === timerState.mode);
         });
 
@@ -1342,7 +1710,7 @@
           });
         });
 
-        document.querySelectorAll(".tab").forEach((tab) => {
+        document.querySelectorAll("#panel-timer .tab").forEach((tab) => {
           tab.addEventListener("click", () => setMode(tab.dataset.mode));
         });
         document.querySelector("#timerStart").addEventListener("click", startTimer);
@@ -1394,24 +1762,310 @@
         });
       }
 
-      const defaultTracker = (index) => {
-        const now = Date.now();
-        return {
-          id: crypto.randomUUID(),
-          name: `Tracker ${index}`,
-          movementType: "other",
-          today: 0,
-          week: 0,
-          lifetime: 0,
-          dailyResetTime: "00:00",
-          weeklyResetDay: 0,
-          weeklyResetTime: "00:00",
-          lastDailyBoundary: dailyBoundary(new Date(), "00:00"),
-          lastWeeklyBoundary: weeklyBoundary(new Date(), 0, "00:00"),
-          createdAt: now,
-          updatedAt: now,
-        };
-      };
+      // --- App-level tabs: Timer / Track / Exercises ---
+      function loadAppTab() {
+        try {
+          const stored = localStorage.getItem(APP_TAB_STORAGE_KEY);
+          return ["timer", "track", "exercises"].includes(stored) ? stored : "track";
+        } catch {
+          return "track";
+        }
+      }
+
+      function switchAppTab(tab) {
+        document.querySelectorAll(".app-tab-panel").forEach((panel) => {
+          panel.classList.toggle("active", panel.dataset.tab === tab);
+        });
+        document.querySelectorAll(".app-tab").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.tab === tab);
+        });
+        localStorage.setItem(APP_TAB_STORAGE_KEY, tab);
+        if (tab === "exercises") renderExerciseList();
+      }
+
+      function bindAppTabs() {
+        document.querySelectorAll(".app-tab").forEach((btn) => {
+          btn.addEventListener("click", () => switchAppTab(btn.dataset.tab));
+        });
+        switchAppTab(loadAppTab());
+      }
+
+      // --- Exercise category chips ---
+      function loadActiveCategory() {
+        try {
+          const stored = localStorage.getItem(CATEGORY_STORAGE_KEY);
+          return CATEGORY_ORDER.includes(stored) ? stored : "cardio";
+        } catch {
+          return "cardio";
+        }
+      }
+
+      let activeCategory = loadActiveCategory();
+
+      function setActiveCategory(category, options = {}) {
+        activeCategory = category;
+        localStorage.setItem(CATEGORY_STORAGE_KEY, category);
+        document.querySelectorAll(".category-chip").forEach((chip) => {
+          chip.classList.toggle("active", chip.dataset.category === category);
+        });
+        if (options.scroll !== false) {
+          const chip = document.querySelector(`.category-chip[data-category="${category}"]`);
+          if (chip) chip.scrollIntoView({ inline: "center", block: "nearest", behavior: options.instant ? "instant" : "smooth" });
+        }
+        renderExerciseList();
+      }
+
+      function bindCategoryChips() {
+        document.querySelectorAll(".category-chip").forEach((chip) => {
+          chip.addEventListener("click", () => setActiveCategory(chip.dataset.category));
+        });
+        setActiveCategory(activeCategory, { instant: true });
+      }
+
+      function hapticTick() {
+        try {
+          if (navigator.vibrate) navigator.vibrate(8);
+        } catch {
+          // Vibration API unsupported (e.g. iOS Safari) — no-op.
+        }
+      }
+
+      function isTracked(exerciseId) {
+        return trackers.some((t) => t.exerciseId === exerciseId);
+      }
+
+      function getTrackerForExercise(exerciseId) {
+        return trackers.find((t) => t.exerciseId === exerciseId);
+      }
+
+      function renderExerciseList() {
+        const list = document.querySelector("#exerciseList");
+        list.replaceChildren();
+        const exercises = exercisesForCategory(activeCategory);
+        exercises.forEach((exercise) => {
+          const row = document.createElement("button");
+          row.type = "button";
+          row.className = "exercise-row" + (isTracked(exercise.id) ? " tracked" : "");
+          const nameSpan = document.createElement("span");
+          nameSpan.className = "exercise-row-name";
+          nameSpan.textContent = exercise.name;
+          const unitSpan = document.createElement("span");
+          unitSpan.className = "exercise-row-unit";
+          unitSpan.textContent = UNIT_LABELS[exercise.measurement] || "";
+          const dot = document.createElement("span");
+          dot.className = "tracked-dot";
+          row.append(nameSpan, unitSpan, dot);
+          row.addEventListener("click", () => {
+            hapticTick();
+            openExerciseConfig(exercise.id);
+          });
+          list.append(row);
+        });
+
+        const addCustom = document.createElement("button");
+        addCustom.type = "button";
+        addCustom.className = "exercise-row add-custom-row";
+        addCustom.textContent = "+ Custom exercise";
+        addCustom.addEventListener("click", () => openCustomExerciseCreator(activeCategory));
+        list.append(addCustom);
+      }
+
+      // --- Exercise configuration overlay ---
+      let configExerciseId = null;
+      let creatingCustomCategory = null;
+
+      function updateConfigIncrementLabel(measurement) {
+        document.querySelector("#configIncrementLabel").textContent =
+          `Default increment (${UNIT_LABELS[measurement] || "reps"})`;
+      }
+
+      function updateConfigHints() {
+        const measurement = currentConfigMeasurement();
+        const incrementInput = document.querySelector("#configIncrement");
+        const goalInput = document.querySelector("#configGoal");
+        const incrementHint = document.querySelector("#configIncrementHint");
+        const goalHint = document.querySelector("#configGoalHint");
+        incrementHint.textContent = measurement === "reps" ? "" : `≈ ${formatQuantity(measurement, incrementInput.value)}`;
+        goalHint.textContent = measurement === "reps" || !goalInput.value ? "" : `≈ ${formatQuantity(measurement, goalInput.value)}`;
+      }
+
+      function currentConfigMeasurement() {
+        if (creatingCustomCategory !== null) return document.querySelector("#configMeasurement").value;
+        const exercise = findExercise(configExerciseId);
+        return exercise ? exercise.measurement : "reps";
+      }
+
+      function populateVariationSelect(variations, selected) {
+        const field = document.querySelector("#configVariationField");
+        const select = document.querySelector("#configVariation");
+        if (!variations || !variations.length) {
+          field.hidden = true;
+          select.innerHTML = "";
+          return;
+        }
+        field.hidden = false;
+        select.innerHTML = variations.map((v) => `<option value="${v}">${v}</option>`).join("");
+        select.value = variations.includes(selected) ? selected : variations[0];
+      }
+
+      function openExerciseConfig(exerciseId) {
+        const exercise = findExercise(exerciseId);
+        if (!exercise) return;
+        configExerciseId = exerciseId;
+        creatingCustomCategory = null;
+        const existing = getTrackerForExercise(exerciseId);
+
+        document.querySelector("#configExerciseName").textContent = exercise.name;
+        document.querySelector("#configCustomNameField").hidden = true;
+        document.querySelector("#configMeasurementField").hidden = true;
+        populateVariationSelect(exercise.variations, existing ? existing.variation : null);
+
+        updateConfigIncrementLabel(exercise.measurement);
+        document.querySelector("#configIncrement").value = existing ? existing.increment : exercise.defaultIncrement || 5;
+        document.querySelector("#configCadence").value = existing ? existing.goalCadence : "weekly";
+        document.querySelector("#configGoal").value = existing && existing.goal ? existing.goal : "";
+        document.querySelector("#configRemove").hidden = !existing;
+        document.querySelector("#configSave").textContent = existing ? "Update tracking" : "Add to Track";
+        updateConfigGoalLabel();
+        updateConfigHints();
+
+        const overlay = document.querySelector("#configOverlay");
+        overlay.classList.add("visible");
+        overlay.setAttribute("aria-hidden", "false");
+      }
+
+      function openCustomExerciseCreator(category) {
+        configExerciseId = null;
+        creatingCustomCategory = category;
+
+        document.querySelector("#configExerciseName").textContent = "New custom exercise";
+        document.querySelector("#configCustomNameField").hidden = false;
+        document.querySelector("#configCustomName").value = "";
+        document.querySelector("#configMeasurementField").hidden = false;
+        document.querySelector("#configMeasurement").value = "reps";
+        populateVariationSelect(null, null);
+
+        updateConfigIncrementLabel("reps");
+        document.querySelector("#configIncrement").value = 5;
+        document.querySelector("#configCadence").value = "weekly";
+        document.querySelector("#configGoal").value = "";
+        document.querySelector("#configRemove").hidden = true;
+        document.querySelector("#configSave").textContent = "Add to Track";
+        updateConfigGoalLabel();
+        updateConfigHints();
+
+        const overlay = document.querySelector("#configOverlay");
+        overlay.classList.add("visible");
+        overlay.setAttribute("aria-hidden", "false");
+      }
+
+      function closeExerciseConfig() {
+        configExerciseId = null;
+        creatingCustomCategory = null;
+        const overlay = document.querySelector("#configOverlay");
+        overlay.classList.remove("visible");
+        overlay.setAttribute("aria-hidden", "true");
+      }
+
+      function updateConfigGoalLabel() {
+        const cadence = document.querySelector("#configCadence").value;
+        const goalField = document.querySelector("#configGoalField");
+        const goalLabel = document.querySelector("#configGoalLabel");
+        if (cadence === "none") {
+          goalField.hidden = true;
+          return;
+        }
+        goalField.hidden = false;
+        const measurement = currentConfigMeasurement();
+        const unit = measurement === "reps" ? "" : ` (${UNIT_LABELS[measurement]})`;
+        goalLabel.textContent = (cadence === "daily" ? "Daily goal" : "Weekly goal") + unit;
+      }
+
+      function saveExerciseConfig() {
+        const increment = clampNumber(document.querySelector("#configIncrement").value, 1, 200000, 5);
+        const cadence = document.querySelector("#configCadence").value;
+        const goalRaw = document.querySelector("#configGoal").value;
+        const goal = cadence !== "none" && goalRaw !== "" ? Math.max(0, Math.round(Number(goalRaw))) : null;
+
+        let exercise;
+        if (creatingCustomCategory !== null) {
+          const name = document.querySelector("#configCustomName").value.trim();
+          if (!name) {
+            document.querySelector("#configCustomName").focus();
+            return;
+          }
+          const measurement = document.querySelector("#configMeasurement").value;
+          const id = `custom-${slugify(name)}-${Date.now().toString(36)}`;
+          exercise = { id, name, category: creatingCustomCategory, measurement, custom: true };
+          customExercises = [...customExercises, exercise];
+          saveCustomExercises();
+        } else {
+          exercise = findExercise(configExerciseId);
+          if (!exercise) return;
+        }
+
+        const variationField = document.querySelector("#configVariationField");
+        const variation = !variationField.hidden ? document.querySelector("#configVariation").value : null;
+
+        const existing = getTrackerForExercise(exercise.id);
+        if (existing) {
+          updateTracker(existing.id, { increment, goalCadence: cadence, goal, variation });
+        } else {
+          trackers = [
+            ...trackers,
+            {
+              id: crypto.randomUUID(),
+              exerciseId: exercise.id,
+              category: exercise.category,
+              name: exercise.name,
+              measurement: exercise.measurement,
+              variation,
+              increment,
+              goalCadence: cadence,
+              goal,
+              today: 0,
+              week: 0,
+              lifetime: 0,
+              lastDailyBoundary: dailyBoundary(new Date(), "00:00"),
+              lastWeeklyBoundary: weeklyBoundary(new Date(), 0, "00:00"),
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+            },
+          ];
+          save();
+          render();
+        }
+        renderExerciseList();
+        closeExerciseConfig();
+      }
+
+      function removeFromTrackViaConfig() {
+        if (!configExerciseId) return;
+        const existing = getTrackerForExercise(configExerciseId);
+        if (existing) removeTracker(existing.id);
+        renderExerciseList();
+        closeExerciseConfig();
+      }
+
+      function bindExerciseConfig() {
+        document.querySelector("#configCadence").addEventListener("change", updateConfigGoalLabel);
+        document.querySelector("#configMeasurement").addEventListener("change", (e) => {
+          updateConfigIncrementLabel(e.target.value);
+          updateConfigGoalLabel();
+          updateConfigHints();
+        });
+        document.querySelector("#configIncrement").addEventListener("input", updateConfigHints);
+        document.querySelector("#configGoal").addEventListener("input", updateConfigHints);
+        document.querySelector("#configSave").addEventListener("click", saveExerciseConfig);
+        document.querySelector("#configRemove").addEventListener("click", removeFromTrackViaConfig);
+        document.querySelector("#configCancel").addEventListener("click", closeExerciseConfig);
+        document.querySelector("#configOverlay").addEventListener("click", (event) => {
+          if (event.target.id === "configOverlay") closeExerciseConfig();
+        });
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") closeExerciseConfig();
+        });
+      }
 
       function parseTime(value) {
         const [hour = "0", minute = "0"] = String(value || "00:00").split(":");
@@ -1439,34 +2093,93 @@
         return boundary.getTime();
       }
 
-      function migrateTracker(tracker) {
+      // Best-effort migration from earlier freeform/5-category schemas.
+      const LEGACY_V1_MOVEMENT_MAP = {
+        pullup: "pull-up",
+        ringpushup: "push-up",
+        pikepushup: "pike-push-up",
+        aussierow: "ring-row",
+        squat: "air-squat",
+        hollowhold: "hollow-body-hold",
+      };
+      const LEGACY_V2_EXERCISE_MAP = {
+        "pull-ups": "pull-up",
+        "chin-ups": "pull-up",
+        "ring-pull-ups": "pull-up",
+        "ring-rows": "ring-row",
+        "australian-rows": "ring-row",
+        "push-ups": "push-up",
+        "ring-push-ups": "push-up",
+        "pike-push-ups": "pike-push-up",
+        squats: "air-squat",
+        "hollow-holds": "hollow-body-hold",
+        running: "running",
+        cycling: "cycling",
+      };
+
+      function migrateLegacyV1Tracker(old) {
+        const mappedId = LEGACY_V1_MOVEMENT_MAP[old.movementType] || null;
+        const found = mappedId ? findExercise(mappedId) : null;
+        return {
+          id: old.id || crypto.randomUUID(),
+          exerciseId: found ? found.id : null,
+          category: found ? found.category : "crosstraining",
+          name: found ? found.name : old.name || "Tracked exercise",
+          measurement: found ? found.measurement : "reps",
+          variation: null,
+          increment: 5,
+          goalCadence: "none",
+          goal: null,
+          today: Number(old.today) || 0,
+          week: Number(old.week) || 0,
+          lifetime: Number(old.lifetime) || 0,
+          lastDailyBoundary: dailyBoundary(new Date(), "00:00"),
+          lastWeeklyBoundary: weeklyBoundary(new Date(), 0, "00:00"),
+          createdAt: old.createdAt || Date.now(),
+          updatedAt: Date.now(),
+        };
+      }
+
+      function migrateLegacyV2Tracker(old) {
+        const mappedId = LEGACY_V2_EXERCISE_MAP[old.exerciseId] || null;
+        const found = mappedId ? findExercise(mappedId) : null;
+        return {
+          id: old.id || crypto.randomUUID(),
+          exerciseId: found ? found.id : null,
+          category: found ? found.category : old.category === "pull" || old.category === "push" || old.category === "legs" || old.category === "core" ? "crosstraining" : "crosstraining",
+          name: found ? found.name : old.name || "Tracked exercise",
+          measurement: found ? found.measurement : "reps",
+          variation: null,
+          increment: Number(old.increment) || 5,
+          goalCadence: ["none", "daily", "weekly"].includes(old.goalCadence) ? old.goalCadence : "none",
+          goal: Number.isFinite(Number(old.goal)) ? Number(old.goal) : null,
+          today: Number(old.today) || 0,
+          week: Number(old.week) || 0,
+          lifetime: Number(old.lifetime) || 0,
+          lastDailyBoundary: dailyBoundary(new Date(), "00:00"),
+          lastWeeklyBoundary: weeklyBoundary(new Date(), 0, "00:00"),
+          createdAt: old.createdAt || Date.now(),
+          updatedAt: Date.now(),
+        };
+      }
+
+      function normalizeTracker(tracker) {
         return {
           ...tracker,
-          movementType: tracker.movementType || "other",
-          dailyResetTime: tracker.dailyResetTime || "00:00",
-          weeklyResetDay: Number(tracker.weeklyResetDay ?? 0),
-          weeklyResetTime: tracker.weeklyResetTime || "00:00",
-          lastDailyBoundary:
-            tracker.lastDailyBoundary ??
-            dailyBoundary(new Date(), tracker.dailyResetTime || "00:00"),
-          lastWeeklyBoundary:
-            tracker.lastWeeklyBoundary ??
-            weeklyBoundary(
-              new Date(),
-              Number(tracker.weeklyResetDay ?? 0),
-              tracker.weeklyResetTime || "00:00",
-            ),
+          measurement: ["reps", "distance", "duration"].includes(tracker.measurement) ? tracker.measurement : "reps",
+          variation: tracker.variation || null,
+          increment: Number.isFinite(Number(tracker.increment)) ? Number(tracker.increment) : 5,
+          goalCadence: ["none", "daily", "weekly"].includes(tracker.goalCadence) ? tracker.goalCadence : "none",
+          goal: Number.isFinite(Number(tracker.goal)) ? Number(tracker.goal) : null,
+          lastDailyBoundary: tracker.lastDailyBoundary ?? dailyBoundary(new Date(), "00:00"),
+          lastWeeklyBoundary: tracker.lastWeeklyBoundary ?? weeklyBoundary(new Date(), 0, "00:00"),
         };
       }
 
       function applyResets(tracker) {
         const now = new Date();
-        const currentDaily = dailyBoundary(now, tracker.dailyResetTime);
-        const currentWeekly = weeklyBoundary(
-          now,
-          tracker.weeklyResetDay,
-          tracker.weeklyResetTime,
-        );
+        const currentDaily = dailyBoundary(now, "00:00");
+        const currentWeekly = weeklyBoundary(now, 0, "00:00");
 
         const next = { ...tracker };
         if (currentDaily > next.lastDailyBoundary) {
@@ -1484,12 +2197,29 @@
       function loadTrackers() {
         try {
           const raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) return [defaultTracker(1)];
-          const parsed = JSON.parse(raw);
-          if (!Array.isArray(parsed)) return [defaultTracker(1)];
-          return parsed.slice(0, MAX_TRACKERS).map(migrateTracker).map(applyResets);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              return parsed.slice(0, MAX_TRACKERS).map(normalizeTracker).map(applyResets);
+            }
+          }
+          const v2Raw = localStorage.getItem(LEGACY_STORAGE_KEY_V2);
+          if (v2Raw) {
+            const v2Parsed = JSON.parse(v2Raw);
+            if (Array.isArray(v2Parsed)) {
+              return v2Parsed.slice(0, MAX_TRACKERS).map(migrateLegacyV2Tracker).map(applyResets);
+            }
+          }
+          const v1Raw = localStorage.getItem(LEGACY_STORAGE_KEY_V1);
+          if (v1Raw) {
+            const v1Parsed = JSON.parse(v1Raw);
+            if (Array.isArray(v1Parsed)) {
+              return v1Parsed.slice(0, MAX_TRACKERS).map(migrateLegacyV1Tracker).map(applyResets);
+            }
+          }
+          return [];
         } catch {
-          return [defaultTracker(1)];
+          return [];
         }
       }
 
@@ -1520,7 +2250,7 @@
           const today = Math.max(0, current.today + delta);
           const week = Math.max(0, current.week + delta);
           const lifetime = Math.max(0, current.lifetime + delta);
-          addXp(delta * xpWeightFor(current.movementType));
+          addXp(delta * xpWeightFor(current));
           return { ...current, today, week, lifetime, updatedAt: Date.now() };
         });
         save();
@@ -1535,6 +2265,17 @@
         trackers = trackers.filter((tracker) => tracker.id !== id);
         save();
         render();
+        renderExerciseList();
+      }
+
+      function goalLineText(tracker) {
+        if (tracker.goalCadence === "daily" && tracker.goal) {
+          return `${formatQuantity(tracker.measurement, tracker.today)} of ${formatQuantity(tracker.measurement, tracker.goal)} today`;
+        }
+        if (tracker.goalCadence === "weekly" && tracker.goal) {
+          return `${formatQuantity(tracker.measurement, tracker.week)} of ${formatQuantity(tracker.measurement, tracker.goal)} this week`;
+        }
+        return null;
       }
 
       function render() {
@@ -1548,7 +2289,14 @@
         if (trackers.length === 0) {
           const empty = document.createElement("div");
           empty.className = "empty";
-          empty.textContent = "No trackers yet. Add one to start counting.";
+          const message = document.createElement("p");
+          message.textContent = "No exercises tracked yet.";
+          const cta = document.createElement("button");
+          cta.type = "button";
+          cta.className = "btn accent-outline";
+          cta.textContent = "Browse Exercises";
+          cta.addEventListener("click", () => switchAppTab("exercises"));
+          empty.append(message, cta);
           grid.append(empty);
           return;
         }
@@ -1556,67 +2304,33 @@
         trackers.forEach((tracker) => {
           const node = template.content.cloneNode(true);
           const card = node.querySelector(".card");
-          const name = node.querySelector(".name");
-          const movementType = node.querySelector(".movement-type");
+          const name = node.querySelector(".tracker-name");
+          const category = node.querySelector(".tracker-category");
           const today = node.querySelector(".today");
           const week = node.querySelector(".week");
           const lifetime = node.querySelector(".lifetime");
-          const dailyTime = node.querySelector(".daily-time");
-          const weeklyTime = node.querySelector(".weekly-time");
-          const weeklyDay = node.querySelector(".weekly-day");
+          const goalLine = node.querySelector(".goal-line");
+          const addIncrement = node.querySelector(".add-increment");
 
           card.dataset.id = tracker.id;
-          name.value = tracker.name;
-          movementType.value = tracker.movementType;
-          today.textContent = tracker.today;
-          week.textContent = tracker.week;
-          lifetime.textContent = tracker.lifetime;
-          dailyTime.value = tracker.dailyResetTime;
-          weeklyTime.value = tracker.weeklyResetTime;
-          weeklyDay.value = String(tracker.weeklyResetDay);
+          name.textContent = tracker.name;
+          const categoryLabel = CATEGORY_LABELS[tracker.category] || "";
+          category.textContent = tracker.variation ? `${categoryLabel} · ${tracker.variation}` : categoryLabel;
+          today.textContent = formatQuantity(tracker.measurement, tracker.today);
+          week.textContent = formatQuantity(tracker.measurement, tracker.week);
+          lifetime.textContent = formatQuantity(tracker.measurement, tracker.lifetime);
 
-          name.addEventListener("change", () =>
-            updateTracker(tracker.id, { name: name.value.trim() || "Untitled" }),
-          );
-          movementType.addEventListener("change", () =>
-            updateTracker(tracker.id, { movementType: movementType.value }),
-          );
-          dailyTime.addEventListener("change", () =>
-            updateTracker(tracker.id, {
-              dailyResetTime: dailyTime.value || "00:00",
-              lastDailyBoundary: dailyBoundary(new Date(), dailyTime.value || "00:00"),
-            }),
-          );
-          weeklyTime.addEventListener("change", () =>
-            updateTracker(tracker.id, {
-              weeklyResetTime: weeklyTime.value || "00:00",
-              lastWeeklyBoundary: weeklyBoundary(
-                new Date(),
-                Number(weeklyDay.value),
-                weeklyTime.value || "00:00",
-              ),
-            }),
-          );
-          weeklyDay.addEventListener("change", () =>
-            updateTracker(tracker.id, {
-              weeklyResetDay: Number(weeklyDay.value),
-              lastWeeklyBoundary: weeklyBoundary(
-                new Date(),
-                Number(weeklyDay.value),
-                weeklyTime.value || "00:00",
-              ),
-            }),
-          );
+          const goalText = goalLineText(tracker);
+          if (goalText) {
+            goalLine.textContent = goalText;
+            goalLine.hidden = false;
+          } else {
+            goalLine.hidden = true;
+          }
 
-          node
-            .querySelector(".add-five")
-            .addEventListener("click", () => changeCount(tracker.id, 5));
-          node
-            .querySelector(".add-ten")
-            .addEventListener("click", () => changeCount(tracker.id, 10));
-          node
-            .querySelector(".add-twenty")
-            .addEventListener("click", () => changeCount(tracker.id, 20));
+          addIncrement.textContent = `+${formatQuantity(tracker.measurement, tracker.increment)}`;
+          addIncrement.addEventListener("click", () => changeCount(tracker.id, tracker.increment));
+
           node
             .querySelector(".minus-one")
             .addEventListener("click", () => changeCount(tracker.id, -1));
@@ -1631,21 +2345,13 @@
         });
       }
 
-      document.querySelector("#addTracker").addEventListener("click", () => {
-        if (trackers.length >= MAX_TRACKERS) {
-          alert("Max 10 trackers.");
-          return;
-        }
-        trackers = [...trackers, defaultTracker(trackers.length + 1)];
-        save();
-        render();
-      });
-
       document.querySelector("#clearAll").addEventListener("click", () => {
-        if (!confirm("Clear all trackers?")) return;
+        if (trackers.length === 0) return;
+        if (!confirm("Clear all tracked exercises?")) return;
         trackers = [];
         save();
         render();
+        renderExerciseList();
       });
 
       document.querySelector("#soundToggle").addEventListener("change", (event) => {
@@ -1657,6 +2363,9 @@
       renderSoundToggle();
       bindTimerSettings();
       bindChairInteraction();
+      bindAppTabs();
+      bindCategoryChips();
+      bindExerciseConfig();
       renderXp();
       render();
       setInterval(render, 60 * 1000);
