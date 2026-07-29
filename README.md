@@ -14,13 +14,13 @@ CrossFit-style Web Audio beeps: 3-second countdown beeps, round/phase change ton
 
 Sound on/off toggle persisted in localStorage
 
-Up to 10 concurrent trackers
+Up to 10 concurrent trackers, each with a movement type and quick +5 / +10 / +20 logging
 
 Daily counter with customizable reset time
 
 Weekly counter with customizable reset day and time
 
-Lifetime total
+Lifetime total, plus a quiet "Lifetime Training" figure at the bottom of the page
 
 Browser-local persistence with localStorage for counters, timer settings, and sound preference
 
