@@ -1,22 +1,110 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Daily Weekly Counter</title>
+    <title>IttaikaOS — Training Counter</title>
     <style>
+      @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400..600&family=Geist+Mono:wght@400..600&display=swap');
+
+      /* ---- SDL tokens (Solitude Design Language, IttaikaOS/dark) ---- */
       :root {
-        color-scheme: light;
-        --bg: #f6f7f4;
-        --panel: #ffffff;
-        --ink: #1b1f1a;
-        --muted: #687164;
-        --line: #dfe4dc;
-        --accent: #4f6f52;
-        --accent-dark: #38513b;
-        --warn: #a23d3d;
-        --timer: #20291f;
-        --shadow: 0 16px 40px rgba(31, 40, 28, 0.08);
+        --sdl-n-0: #fbfbfc;
+        --sdl-n-50: #f6f6f8;
+        --sdl-n-100: #efeff2;
+        --sdl-n-150: #e8e7ed;
+        --sdl-n-300: #c6c5cd;
+        --sdl-n-600: #64646b;
+        --sdl-n-800: #3a3a41;
+        --sdl-n-900: #1d1d23;
+        --sdl-n-950: #17171c;
+        --sdl-n-1000: #101014;
+
+        --sdl-violet-300: #b4a6d3;
+        --sdl-violet-400: #9182ba;
+        --sdl-violet-700: #4b3d77;
+        --sdl-violet-800: #3a2f5d;
+        --sdl-violet-900: #2a2344;
+
+        --font-ui: "Geist", -apple-system, "Segoe UI", sans-serif;
+        --font-mono: "Geist Mono", ui-monospace, "SF Mono", monospace;
+
+        --text-2xs: 11px;
+        --text-xs: 12px;
+        --text-sm: 13px;
+        --text-md: 14px;
+        --text-lg: 16px;
+        --text-xl: 18px;
+        --text-2xl: 24px;
+        --text-3xl: 28px;
+
+        --leading-tight: 1.2;
+        --leading-normal: 1.5;
+
+        --weight-regular: 400;
+        --weight-medium: 500;
+        --weight-semibold: 600;
+
+        --tracking-display: -0.02em;
+        --tracking-heading: -0.01em;
+        --tracking-caps: 0.08em;
+
+        --numeric: "tnum" 1, "lnum" 1;
+
+        --space-1: 4px;
+        --space-2: 8px;
+        --space-3: 12px;
+        --space-4: 16px;
+        --space-5: 20px;
+        --space-6: 24px;
+
+        --radius-1: 3px;
+        --radius-2: 5px;
+        --radius-3: 8px;
+        --radius-full: 999px;
+
+        --shadow-1: 0 1px 2px rgba(16, 16, 20, 0.05);
+
+        --dur-1: 120ms;
+        --dur-2: 180ms;
+        --ease-out: cubic-bezier(0.25, 0.1, 0, 1);
+
+        /* Dark theme semantic tokens */
+        --surface-page: var(--sdl-n-1000);
+        --surface-card: var(--sdl-n-950);
+        --surface-sunken: #0c0c0f;
+        --surface-input: var(--sdl-n-950);
+
+        --text-primary: #f2f2f0;
+        --text-secondary: #ababb2;
+        --text-tertiary: #77777e;
+        --text-on-accent: #ffffff;
+
+        --border-default: #2a2a31;
+        --border-strong: #3a3a41;
+        --border-input: #3a3a41;
+
+        --accent: var(--sdl-violet-400);
+        --accent-hover: var(--sdl-violet-300);
+        --accent-active: #d5cde8;
+        --accent-subtle: #211d33;
+        --accent-muted: var(--sdl-violet-900);
+        --accent-text: var(--sdl-violet-300);
+        --border-accent: var(--sdl-violet-800);
+
+        --danger: #c4746e;
+        --danger-hover: #d38f8a;
+
+        --focus-ring: var(--sdl-violet-400);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        :root { --dur-1: 1ms; --dur-2: 1ms; }
+      }
+
+      @keyframes sdl-settle {
+        from { opacity: 0; transform: translateY(2px); }
+        to { opacity: 1; transform: none; }
       }
 
       * {
@@ -26,23 +114,29 @@
       body {
         margin: 0;
         min-height: 100vh;
-        background: var(--bg);
-        color: var(--ink);
-        font-family:
-          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-          "Segoe UI", sans-serif;
+        background: var(--surface-page);
+        color: var(--text-primary);
+        font-family: var(--font-ui);
+        font-size: var(--text-md);
+        line-height: var(--leading-normal);
+        -webkit-font-smoothing: antialiased;
       }
 
-      button,
-      input,
-      select {
+      button, input, select {
         font: inherit;
+        color: inherit;
+      }
+
+      :focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: 2px;
+        border-radius: var(--radius-1);
       }
 
       .app {
         width: min(1120px, calc(100% - 32px));
         margin: 0 auto;
-        padding: 28px 0 40px;
+        padding: 32px 0 48px;
       }
 
       header {
@@ -50,233 +144,410 @@
         align-items: end;
         justify-content: space-between;
         gap: 18px;
-        margin-bottom: 22px;
+        margin-bottom: var(--space-6);
+      }
+
+      .kicker {
+        margin: 0 0 6px;
+        text-transform: uppercase;
+        letter-spacing: var(--tracking-caps);
+        font-size: var(--text-xs);
+        font-weight: var(--weight-semibold);
+        color: var(--accent-text);
       }
 
       h1 {
         margin: 0;
-        font-size: clamp(2rem, 4vw, 4rem);
-        line-height: 0.95;
-        letter-spacing: 0;
+        font-size: clamp(1.75rem, 3.4vw, var(--text-3xl));
+        font-weight: var(--weight-semibold);
+        letter-spacing: var(--tracking-display);
+        line-height: var(--leading-tight);
       }
 
       .sub {
-        max-width: 680px;
-        margin: 10px 0 0;
-        color: var(--muted);
-        font-size: 1rem;
+        max-width: 640px;
+        margin: 6px 0 0;
+        color: var(--text-tertiary);
+        font-size: var(--text-sm);
       }
 
       .toolbar {
         display: flex;
-        gap: 10px;
+        align-items: center;
+        gap: var(--space-3);
         flex-wrap: wrap;
         justify-content: flex-end;
       }
 
-      .btn {
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: var(--panel);
-        color: var(--ink);
+      /* Switch (SDL forms/Switch) */
+      .switch {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
         cursor: pointer;
-        min-height: 40px;
-        padding: 9px 13px;
+        font-size: var(--text-sm);
+        color: var(--text-secondary);
+      }
+
+      .switch-track {
+        position: relative;
+        width: 32px;
+        height: 18px;
+        flex: none;
+      }
+
+      .switch-track input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        margin: 0;
+        cursor: pointer;
+      }
+
+      .switch-rail {
+        position: absolute;
+        inset: 0;
+        border-radius: var(--radius-full);
+        background: var(--sdl-n-800);
+        transition: background var(--dur-1) var(--ease-out);
+        pointer-events: none;
+      }
+
+      .switch-track input:checked ~ .switch-rail {
+        background: var(--accent);
+      }
+
+      .switch-knob {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 14px;
+        height: 14px;
+        border-radius: var(--radius-full);
+        background: #fff;
+        box-shadow: var(--shadow-1);
+        transition: left var(--dur-1) var(--ease-out);
+        pointer-events: none;
+      }
+
+      .switch-track input:checked ~ .switch-knob {
+        left: 16px;
+      }
+
+      /* Buttons (SDL actions/Button) */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        height: 38px;
+        padding: 0 var(--space-4);
+        border-radius: var(--radius-2);
+        border: 1px solid var(--border-strong);
+        background: var(--surface-card);
+        color: var(--text-primary);
+        font-size: var(--text-sm);
+        font-weight: var(--weight-medium);
+        cursor: pointer;
+        transition: background var(--dur-1) var(--ease-out), border-color var(--dur-1) var(--ease-out);
       }
 
       .btn:hover {
-        border-color: #b8c3b4;
+        background: var(--surface-sunken);
       }
 
       .btn.primary {
         background: var(--accent);
         border-color: var(--accent);
-        color: white;
+        color: var(--text-on-accent);
       }
 
       .btn.primary:hover {
-        background: var(--accent-dark);
+        background: var(--accent-hover);
       }
 
       .btn.danger {
-        color: var(--warn);
+        color: var(--danger);
+        border-color: var(--border-strong);
+      }
+
+      .btn.danger:hover {
+        color: var(--danger-hover);
+        border-color: var(--danger);
       }
 
       .grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 14px;
+        gap: var(--space-4);
+      }
+
+      /* Card (SDL display/Card) */
+      .card {
+        background: var(--surface-card);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-3);
+        box-shadow: var(--shadow-1);
       }
 
       .timer-card {
         display: grid;
-        grid-template-columns: minmax(260px, 0.95fr) minmax(280px, 1.05fr);
-        gap: 16px;
+        grid-template-columns: minmax(280px, 1fr) minmax(300px, 1.05fr);
+        gap: 0;
         align-items: stretch;
-        margin-bottom: 18px;
+        margin-bottom: var(--space-5);
+        overflow: hidden;
       }
 
       .timer-face {
         display: grid;
         align-content: center;
-        gap: 14px;
+        gap: var(--space-4);
         min-height: 320px;
-        border-radius: 8px;
-        background: var(--timer);
-        color: white;
-        padding: 24px;
+        background: var(--surface-sunken);
+        border-right: 1px solid var(--border-default);
+        padding: var(--space-6);
       }
 
+      /* Tabs (SDL navigation/Tabs) */
       .mode-tabs {
         display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
+        gap: var(--space-5);
+        border-bottom: 1px solid var(--border-default);
       }
 
       .tab {
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.08);
-        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: none;
+        background: transparent;
         cursor: pointer;
-        padding: 8px 12px;
+        padding: 8px 0 10px;
+        font-size: var(--text-sm);
+        font-weight: var(--weight-regular);
+        color: var(--text-tertiary);
+        transition: color var(--dur-1) var(--ease-out);
+      }
+
+      .tab:hover {
+        color: var(--text-secondary);
       }
 
       .tab.active {
-        background: white;
-        color: var(--timer);
+        color: var(--text-primary);
+        font-weight: var(--weight-medium);
+      }
+
+      .tab-indicator {
+        width: 2px;
+        height: 13px;
+        border-radius: 1px;
+        background: transparent;
+        transition: background var(--dur-1) var(--ease-out);
+      }
+
+      .tab.active .tab-indicator {
+        background: var(--accent);
       }
 
       .timer-time {
+        font-family: var(--font-mono);
         font-variant-numeric: tabular-nums;
-        font-size: clamp(4.4rem, 12vw, 8.2rem);
-        font-weight: 900;
-        letter-spacing: 0;
-        line-height: 0.88;
+        font-feature-settings: var(--numeric);
+        font-size: clamp(3.2rem, 9vw, 6.4rem);
+        font-weight: var(--weight-semibold);
+        letter-spacing: var(--tracking-display);
+        line-height: 1;
+        color: var(--text-primary);
       }
 
       .timer-meta {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
-        color: rgba(255, 255, 255, 0.78);
+        gap: var(--space-2);
       }
 
+      /* Pill / Tag (SDL display/Tag) */
       .pill {
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 999px;
-        padding: 6px 10px;
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 10px;
+        border-radius: var(--radius-full);
+        background: var(--surface-card);
+        border: 1px solid var(--border-default);
+        color: var(--text-secondary);
+        font-size: var(--text-xs);
       }
 
       .timer-controls {
         display: grid;
         grid-template-columns: 1.5fr 1fr 1fr;
-        gap: 8px;
+        gap: var(--space-2);
       }
 
       .timer-controls .btn {
-        min-height: 48px;
+        min-height: 44px;
       }
 
       .timer-settings {
         display: grid;
-        gap: 12px;
+        gap: var(--space-4);
         align-content: start;
+        padding: var(--space-6);
+      }
+
+      .field-label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: var(--text-xs);
+        font-weight: var(--weight-medium);
+        color: var(--text-secondary);
       }
 
       .setting-row {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
+        gap: var(--space-3);
+      }
+
+      .setting-row.settle {
+        animation: sdl-settle var(--dur-2) var(--ease-out);
       }
 
       .hint {
-        color: var(--muted);
-        font-size: 0.88rem;
-        line-height: 1.4;
+        color: var(--text-tertiary);
+        font-size: var(--text-xs);
+        line-height: 1.5;
         margin: 0;
+        padding-top: var(--space-2);
+        border-top: 1px solid var(--border-default);
       }
 
-      .card {
-        background: var(--panel);
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        box-shadow: var(--shadow);
-        padding: 16px;
+      /* Collapsible settings groups */
+      .settings-group {
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-2);
+        background: var(--surface-sunken);
+      }
+
+      .settings-group summary {
+        list-style: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        padding: 10px var(--space-3);
+        font-size: var(--text-sm);
+        font-weight: var(--weight-medium);
+        color: var(--text-primary);
+        border-radius: var(--radius-2);
+        transition: background var(--dur-1) var(--ease-out);
+      }
+
+      .settings-group summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .settings-group summary:hover {
+        background: var(--accent-subtle);
+      }
+
+      .settings-group summary::after {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-right: 1.5px solid var(--text-tertiary);
+        border-bottom: 1.5px solid var(--text-tertiary);
+        transform: rotate(-45deg);
+        transition: transform var(--dur-1) var(--ease-out);
+      }
+
+      .settings-group[open] summary::after {
+        transform: rotate(45deg);
+      }
+
+      .settings-group .setting-row {
+        padding: 0 var(--space-3) var(--space-3);
       }
 
       .card-top {
         display: grid;
         grid-template-columns: 1fr auto;
-        gap: 10px;
+        gap: var(--space-3);
         align-items: center;
+        padding: var(--space-5) var(--space-5) 0;
       }
 
       .name {
         width: 100%;
         border: 0;
-        border-bottom: 1px solid var(--line);
-        padding: 6px 0;
-        color: var(--ink);
+        border-bottom: 1px solid transparent;
+        padding: 4px 0;
+        color: var(--text-primary);
         background: transparent;
-        font-size: 1.05rem;
-        font-weight: 700;
+        font-size: var(--text-lg);
+        font-weight: var(--weight-semibold);
+        letter-spacing: var(--tracking-heading);
       }
 
-      .name:focus,
-      input:focus,
-      select:focus {
-        outline: 2px solid rgba(79, 111, 82, 0.25);
-        outline-offset: 2px;
+      .name:hover, .name:focus {
+        border-bottom-color: var(--border-default);
+      }
+
+      .name:focus-visible {
+        outline: none;
+        border-bottom-color: var(--accent);
       }
 
       .stats {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-        margin: 16px 0;
+        gap: var(--space-2);
+        padding: var(--space-4) var(--space-5) 0;
       }
 
       .stat {
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        padding: 10px;
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-2);
+        padding: var(--space-3);
         min-width: 0;
       }
 
       .label {
         display: block;
-        color: var(--muted);
-        font-size: 0.75rem;
-        line-height: 1.2;
+        color: var(--text-tertiary);
+        font-size: var(--text-2xs);
+        font-weight: var(--weight-medium);
+        letter-spacing: var(--tracking-caps);
+        text-transform: uppercase;
       }
 
       .value {
         display: block;
         margin-top: 4px;
-        font-size: 1.8rem;
-        font-weight: 800;
-        line-height: 1;
+        font-family: var(--font-mono);
+        font-feature-settings: var(--numeric);
+        font-size: var(--text-2xl);
+        font-weight: var(--weight-semibold);
+        line-height: 1.2;
+        color: var(--text-primary);
       }
 
       .controls {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
+        gap: var(--space-2);
+        padding: var(--space-4) var(--space-5) 0;
       }
 
       .settings {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin-top: 14px;
-        padding-top: 14px;
-        border-top: 1px solid var(--line);
-      }
-
-      .field {
-        display: grid;
-        gap: 5px;
+        gap: var(--space-3);
+        margin-top: var(--space-4);
+        padding: var(--space-4) var(--space-5) var(--space-5);
+        border-top: 1px solid var(--border-default);
       }
 
       .field.full {
@@ -284,28 +555,41 @@
       }
 
       .field label {
-        color: var(--muted);
-        font-size: 0.78rem;
+        display: block;
+        margin-bottom: 6px;
+        color: var(--text-tertiary);
+        font-size: var(--text-xs);
       }
 
-      .field input,
-      .field select {
+      input[type="number"],
+      input[type="time"],
+      select {
         width: 100%;
-        min-height: 38px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: white;
-        color: var(--ink);
-        padding: 8px 9px;
+        min-height: 32px;
+        border: 1px solid var(--border-input);
+        border-radius: var(--radius-2);
+        background: var(--surface-input);
+        color: var(--text-primary);
+        padding: 0 9px;
+        transition: border-color var(--dur-1) var(--ease-out), box-shadow var(--dur-1) var(--ease-out);
+      }
+
+      input[type="number"]:focus,
+      input[type="time"]:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--focus-ring);
+        box-shadow: 0 0 0 3px var(--accent-muted);
       }
 
       .empty {
-        border: 1px dashed #b8c3b4;
-        border-radius: 8px;
-        padding: 26px;
+        border: 1px dashed var(--border-strong);
+        border-radius: var(--radius-3);
+        padding: 32px;
         text-align: center;
-        color: var(--muted);
-        background: rgba(255, 255, 255, 0.5);
+        color: var(--text-tertiary);
+        font-size: var(--text-sm);
+        background: var(--surface-sunken);
       }
 
       @media (max-width: 720px) {
@@ -315,11 +599,7 @@
         }
 
         .toolbar {
-          justify-content: stretch;
-        }
-
-        .toolbar .btn {
-          flex: 1;
+          justify-content: space-between;
         }
 
         .timer-card {
@@ -327,7 +607,9 @@
         }
 
         .timer-face {
-          min-height: 280px;
+          min-height: 260px;
+          border-right: none;
+          border-bottom: 1px solid var(--border-default);
         }
 
         .setting-row,
@@ -341,13 +623,23 @@
     <main class="app">
       <header>
         <div>
+          <p class="kicker">IttaikaOS</p>
           <h1>Training Counter</h1>
           <p class="sub">
             Run EMOMs, HIIT intervals, a simple stopwatch, and up to 10 daily or
-            weekly trackers with persistent browser memory.
+            weekly trackers with persistent browser memory and CrossFit-style
+            audio cues.
           </p>
         </div>
         <div class="toolbar">
+          <label class="switch">
+            <span class="switch-track">
+              <input type="checkbox" id="soundToggle" checked />
+              <span class="switch-rail"></span>
+              <span class="switch-knob"></span>
+            </span>
+            Sound
+          </label>
           <button class="btn primary" id="addTracker">Add tracker</button>
           <button class="btn danger" id="clearAll">Clear all</button>
         </div>
@@ -357,10 +649,14 @@
         <div class="timer-face">
           <div class="mode-tabs" role="tablist" aria-label="Timer mode">
             <button class="tab active" type="button" data-mode="stopwatch">
-              Stopwatch
+              <span class="tab-indicator"></span>Stopwatch
             </button>
-            <button class="tab" type="button" data-mode="emom">EMOM</button>
-            <button class="tab" type="button" data-mode="hiit">HIIT</button>
+            <button class="tab" type="button" data-mode="emom">
+              <span class="tab-indicator"></span>EMOM
+            </button>
+            <button class="tab" type="button" data-mode="hiit">
+              <span class="tab-indicator"></span>HIIT
+            </button>
           </div>
 
           <div class="timer-time" id="timerDisplay">00:00</div>
@@ -377,39 +673,46 @@
         </div>
 
         <div class="timer-settings">
-          <div class="setting-row">
-            <div class="field">
-              <label>EMOM rounds</label>
-              <input id="emomRounds" type="number" min="1" max="60" value="10" />
-            </div>
-            <div class="field">
-              <label>EMOM minutes</label>
-              <input id="emomMinutes" type="number" min="1" max="10" value="1" />
-            </div>
-            <div class="field">
-              <label>Countdown</label>
-              <input id="countdownSeconds" type="number" min="0" max="30" value="5" />
-            </div>
+          <div>
+            <label class="field-label" for="countdownSeconds">Countdown (EMOM &amp; HIIT)</label>
+            <input id="countdownSeconds" type="number" min="0" max="30" value="5" />
           </div>
 
-          <div class="setting-row">
-            <div class="field">
-              <label>HIIT rounds</label>
-              <input id="hiitRounds" type="number" min="1" max="99" value="8" />
+          <details class="settings-group" id="emomSettings">
+            <summary>EMOM settings</summary>
+            <div class="setting-row">
+              <div>
+                <label class="field-label" for="emomRounds">Rounds</label>
+                <input id="emomRounds" type="number" min="1" max="60" value="10" />
+              </div>
+              <div>
+                <label class="field-label" for="emomMinutes">Minutes / round</label>
+                <input id="emomMinutes" type="number" min="1" max="10" value="1" />
+              </div>
             </div>
-            <div class="field">
-              <label>Work seconds</label>
-              <input id="workSeconds" type="number" min="5" max="600" value="40" />
+          </details>
+
+          <details class="settings-group" id="hiitSettings">
+            <summary>HIIT settings</summary>
+            <div class="setting-row">
+              <div>
+                <label class="field-label" for="hiitRounds">Rounds</label>
+                <input id="hiitRounds" type="number" min="1" max="99" value="8" />
+              </div>
+              <div>
+                <label class="field-label" for="workSeconds">Work seconds</label>
+                <input id="workSeconds" type="number" min="5" max="600" value="40" />
+              </div>
+              <div>
+                <label class="field-label" for="restSeconds">Rest seconds</label>
+                <input id="restSeconds" type="number" min="0" max="600" value="20" />
+              </div>
             </div>
-            <div class="field">
-              <label>Rest seconds</label>
-              <input id="restSeconds" type="number" min="0" max="600" value="20" />
-            </div>
-          </div>
+          </details>
 
           <p class="hint">
-            EMOM uses the minute as the full round. HIIT alternates work and rest.
-            Stopwatch is clean count-up timing for runs, stations, or rest.
+            The last 3 seconds of every phase beep, each new round or phase
+            change plays a tone, and finishing plays a rising three-tone chime.
           </p>
         </div>
       </section>
@@ -474,6 +777,7 @@
     <script>
       const STORAGE_KEY = "daily-weekly-counter:v1";
       const TIMER_STORAGE_KEY = "daily-weekly-counter:timer:v1";
+      const SOUND_STORAGE_KEY = "daily-weekly-counter:sound:v1";
       const MAX_TRACKERS = 10;
       const TIMER_DEFAULTS = {
         mode: "stopwatch",
@@ -492,7 +796,104 @@
         elapsedBeforeStart: 0,
         settings: loadTimerSettings(),
         intervalId: null,
+        audio: { lastSegmentKey: null, lastCountedSecond: null, finished: false },
       };
+
+      // --- Web Audio: CrossFit-style beeps ---
+      let audioCtx = null;
+
+      function loadSoundEnabled() {
+        try {
+          const raw = localStorage.getItem(SOUND_STORAGE_KEY);
+          if (raw === null) return true;
+          return JSON.parse(raw) === true;
+        } catch {
+          return true;
+        }
+      }
+
+      function saveSoundEnabled() {
+        localStorage.setItem(SOUND_STORAGE_KEY, JSON.stringify(soundState.enabled));
+      }
+
+      const soundState = { enabled: loadSoundEnabled() };
+
+      function ensureAudioCtx() {
+        if (!soundState.enabled) return null;
+        if (!audioCtx) {
+          const Ctx = window.AudioContext || window.webkitAudioContext;
+          if (!Ctx) return null;
+          audioCtx = new Ctx();
+        }
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        return audioCtx;
+      }
+
+      function beep(freq = 880, duration = 0.12, type = "square", gain = 0.2) {
+        const ctx = ensureAudioCtx();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        osc.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        const now = ctx.currentTime;
+        gainNode.gain.setValueAtTime(gain, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+        osc.start(now);
+        osc.stop(now + duration);
+      }
+
+      function shortBeep() {
+        beep(880, 0.1, "square", 0.18);
+      }
+
+      function goBeep() {
+        beep(1320, 0.22, "square", 0.22);
+      }
+
+      function finishTone() {
+        [660, 880, 1320].forEach((freq, i) => {
+          setTimeout(() => beep(freq, 0.25, "sine", 0.25), i * 180);
+        });
+      }
+
+      function resetAudioState() {
+        timerState.audio = { lastSegmentKey: null, lastCountedSecond: null, finished: false };
+      }
+
+      function handleAudioCues(snapshot) {
+        if (!soundState.enabled) return;
+        if (!timerState.running) return;
+        if (timerState.mode === "stopwatch") return;
+
+        if (snapshot.segmentKey !== timerState.audio.lastSegmentKey) {
+          if (timerState.audio.lastSegmentKey !== null) goBeep();
+          timerState.audio.lastSegmentKey = snapshot.segmentKey;
+          timerState.audio.lastCountedSecond = null;
+        }
+
+        const remaining = snapshot.remainingInPhase;
+        const wholeRemaining = Math.ceil(remaining - 0.001);
+        if (
+          remaining > 0 &&
+          remaining <= 3.05 &&
+          wholeRemaining !== timerState.audio.lastCountedSecond
+        ) {
+          shortBeep();
+          timerState.audio.lastCountedSecond = wholeRemaining;
+        }
+
+        if (snapshot.complete && !timerState.audio.finished) {
+          finishTone();
+          timerState.audio.finished = true;
+        }
+      }
+
+      function renderSoundToggle() {
+        document.querySelector("#soundToggle").checked = soundState.enabled;
+      }
 
       function clampNumber(value, min, max, fallback) {
         const number = Number(value);
@@ -560,6 +961,8 @@
             phase: timerState.running ? "Running" : "Ready",
             round: "Stopwatch",
             complete: false,
+            segmentKey: "stopwatch",
+            remainingInPhase: Infinity,
           };
         }
 
@@ -569,6 +972,8 @@
             phase: "Get ready",
             round: "Countdown",
             complete: false,
+            segmentKey: "countdown",
+            remainingInPhase: countdown - elapsed,
           };
         }
 
@@ -580,6 +985,8 @@
             phase: "Done",
             round: `Round ${plan.rounds} / ${plan.rounds}`,
             complete: true,
+            segmentKey: "done",
+            remainingInPhase: 0,
           };
         }
 
@@ -588,11 +995,14 @@
         const roundNumber = roundIndex + 1;
 
         if (timerState.mode === "emom") {
+          const remainingInPhase = plan.roundSeconds - roundElapsed;
           return {
-            display: formatSeconds(plan.roundSeconds - roundElapsed),
+            display: formatSeconds(remainingInPhase),
             phase: "EMOM",
             round: `Round ${roundNumber} / ${plan.rounds}`,
             complete: false,
+            segmentKey: `emom:${roundNumber}`,
+            remainingInPhase,
           };
         }
 
@@ -605,6 +1015,8 @@
           phase: inWork ? "Work" : "Rest",
           round: `Round ${roundNumber} / ${plan.rounds}`,
           complete: false,
+          segmentKey: `hiit:${roundNumber}:${inWork ? "work" : "rest"}`,
+          remainingInPhase: phaseSeconds,
         };
       }
 
@@ -621,11 +1033,14 @@
           tab.classList.toggle("active", tab.dataset.mode === timerState.mode);
         });
 
+        handleAudioCues(snapshot);
+
         if (snapshot.complete && timerState.running) pauseTimer(true);
       }
 
       function startTimer() {
         if (timerState.running) return;
+        ensureAudioCtx();
         timerState.running = true;
         timerState.startedAt = Date.now();
         timerState.intervalId = setInterval(renderTimer, 250);
@@ -649,13 +1064,22 @@
         timerState.elapsedBeforeStart = 0;
         clearInterval(timerState.intervalId);
         timerState.intervalId = null;
+        resetAudioState();
         renderTimer();
+      }
+
+      function syncSettingsVisibility() {
+        const emomDetails = document.querySelector("#emomSettings");
+        const hiitDetails = document.querySelector("#hiitSettings");
+        emomDetails.open = timerState.mode === "emom";
+        hiitDetails.open = timerState.mode === "hiit";
       }
 
       function setMode(mode) {
         timerState.mode = mode;
         resetTimer();
         saveTimerSettings();
+        syncSettingsVisibility();
       }
 
       function bindTimerSettings() {
@@ -691,6 +1115,18 @@
         document.querySelector("#timerStart").addEventListener("click", startTimer);
         document.querySelector("#timerPause").addEventListener("click", () => pauseTimer());
         document.querySelector("#timerReset").addEventListener("click", resetTimer);
+
+        document.querySelectorAll(".settings-group").forEach((details) => {
+          details.addEventListener("toggle", () => {
+            if (!details.open) return;
+            const content = details.querySelector(".setting-row");
+            content.classList.remove("settle");
+            void content.offsetWidth;
+            content.classList.add("settle");
+          });
+        });
+
+        syncSettingsVisibility();
         renderTimer();
       }
 
@@ -936,6 +1372,13 @@
         render();
       });
 
+      document.querySelector("#soundToggle").addEventListener("change", (event) => {
+        soundState.enabled = event.target.checked;
+        saveSoundEnabled();
+        if (soundState.enabled) ensureAudioCtx();
+      });
+
+      renderSoundToggle();
       bindTimerSettings();
       render();
       setInterval(render, 60 * 1000);
